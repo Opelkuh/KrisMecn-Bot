@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using DSharpPlus.Entities;
 using System.Text;
+using KrisMecn.Voice;
 
 namespace KrisMecn.Commands
 {
@@ -32,6 +33,18 @@ namespace KrisMecn.Commands
         public async Task Play(CommandContext ctx, Uri url)
         {
             await ctx.PlayFromURL(url).ConfigureAwait(false);
+        }
+
+        [
+            Command("nightcore"),
+            Aliases("nc", "playnightcore"),
+            Description(@"Plays """"""nightcore"""""" from the provided link in your current voice channel")
+        ]
+        public async Task PlayNightcore(CommandContext ctx, Uri url)
+        {
+            var converter = new Converter().IncreaseTempo(1.25);
+
+            await ctx.PlayFromURL(url, converter).ConfigureAwait(false);
         }
 
         [

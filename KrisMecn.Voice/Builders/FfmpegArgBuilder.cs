@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Collections.Generic;
 
 namespace KrisMecn.Voice.Builders
 {
@@ -8,6 +9,7 @@ namespace KrisMecn.Voice.Builders
     internal class FfmpegArgBuilder
     {
         StringBuilder _sb = new StringBuilder();
+        List<string> _audioFilters = new List<string>();
 
         public FfmpegArgBuilder Input(string input)
         {
@@ -27,6 +29,14 @@ namespace KrisMecn.Voice.Builders
             return this;
         }
 
+        public FfmpegArgBuilder AddAudioFilter(string name, double value)
+            => AddAudioFilter(name, value.ToString());
+        public FfmpegArgBuilder AddAudioFilter(string name, string value)
+        {
+            _audioFilters.Add($"{name}={value}");
+            return this;
+        }
+
         public FfmpegArgBuilder Format(string format)
         {
             _sb.AppendFormat("-f {0} ", format);
@@ -35,6 +45,21 @@ namespace KrisMecn.Voice.Builders
 
         public string Build(string output)
         {
+            // add all audio filters
+            if(_audioFilters.Count > 0)
+            {
+                _sb.Append("-filter:a ");
+
+                var lastIndex = _audioFilters.Count - 1;
+                for (int i = 0; i < lastIndex; i++)
+                {
+                    _sb.AppendFormat("{0},", _audioFilters[i]);
+                }
+                
+                // append last without comma
+                _sb.AppendFormat("{0} ", _audioFilters[lastIndex]);
+            }
+
             _sb.Append(output);
 
             return _sb.ToString();
