@@ -13,7 +13,7 @@ namespace KrisMecn.Extensions
 {
     static class VoiceCommandContextExtensions
     {
-        public async static Task PlayFromURL(this CommandContext ctx, Uri uri)
+        public async static Task PlayFromURL(this CommandContext ctx, Uri uri, Converter converter = null)
         {
             if (!uri.IsHttp())
             {
@@ -21,8 +21,11 @@ namespace KrisMecn.Extensions
                 return;
             }
 
+            // create converter if none is provided
+            if (converter == null) converter = new Converter();
+            converter.ToPCM(); // set output to PCM
+            
             var downloader = ctx.Client.GetDownloader();
-            var converter = new Converter().ToPCM();
 
             var downloadStream = downloader.Download(uri.AbsoluteUri);
             var converterStream = converter.Start();

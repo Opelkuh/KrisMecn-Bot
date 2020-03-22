@@ -112,7 +112,7 @@ namespace DSharpPlus.VoiceNext
         private uint Timestamp { get; set; }
         private uint SSRC { get; set; }
         private byte[] Key { get; set; }
-        private IpEndpoint DiscoveredEndpoint { get; set; }
+        private IpEndpoint? DiscoveredEndpoint { get; set; }
         internal ConnectionEndpoint WebSocketEndpoint { get; set; }
         internal ConnectionEndpoint UdpEndpoint { get; set; }
 
@@ -252,7 +252,12 @@ namespace DSharpPlus.VoiceNext
         }
 
         internal Task ReconnectAsync()
-            => this.VoiceWs.DisconnectAsync();
+        {
+            this.SenderTokenSource.Cancel();
+            this.ReceiverTokenSource.Cancel();
+
+            return this.VoiceWs.DisconnectAsync();
+        }
 
         internal async Task StartAsync()
         {
@@ -298,7 +303,7 @@ namespace DSharpPlus.VoiceNext
             this.Rtp?.EncodeHeader(this.Sequence, this.Timestamp, this.SSRC, packet);
 
             var opus = packet.Slice(Rtp.HeaderSize, pcm.Length);
-            lock(this.Opus)
+            lock (this.Opus)
             {
                 if (this.Opus == null) return;
                 this.Opus.Encode(pcm, ref opus);
@@ -307,7 +312,8 @@ namespace DSharpPlus.VoiceNext
             this.Sequence++;
             this.Timestamp += (uint)audioFormat.CalculateFrameSize(audioFormat.CalculateSampleDuration(pcm.Length));
 
-            lock(this.Sodium) {
+            lock (this.Sodium)
+            {
                 if (this.Sodium == null) return;
 
                 Span<byte> nonce = stackalloc byte[Sodium.NonceSize];
@@ -347,7 +353,7 @@ namespace DSharpPlus.VoiceNext
 
         internal void EnqueueSilence(int numberOfPackets = 5)
         {
-            for(int i = 0; i < numberOfPackets; i++)
+            for (int i = 0; i < numberOfPackets; i++)
             {
                 var span = new ReadOnlyMemory<byte>(new byte[] { 0xF8, 0xFF, 0xFE });
                 this.PacketQueue.Add(new VoicePacket(span, 20, true));
@@ -360,6 +366,7 @@ namespace DSharpPlus.VoiceNext
             var client = this.UdpClient;
             var queue = this.PacketQueue;
 
+            var hadPacket = false;
             var synchronizerTicks = (double)Stopwatch.GetTimestamp();
             var synchronizerResolution = (Stopwatch.Frequency * 0.005);
             var tickResolution = 10_000_000.0 / Stopwatch.Frequency;
@@ -403,7 +410,12 @@ namespace DSharpPlus.VoiceNext
                 if (!hasPacket)
                     continue;
 
-                await this.SendSpeakingAsync(true).ConfigureAwait(false);
+                if (!hadPacket)
+                {
+                    await this.SendSpeakingAsync(true).ConfigureAwait(false);
+                    hadPacket = true;
+                }
+
                 await client.SendAsync(packetArray, packetArray.Length).ConfigureAwait(false);
 
                 if (!packet.IsSilence && queue.Count == 0)
@@ -412,6 +424,7 @@ namespace DSharpPlus.VoiceNext
                 }
                 else if (queue.Count == 0)
                 {
+                    hadPacket = false;
                     await this.SendSpeakingAsync(false).ConfigureAwait(false);
                     this.PlayingWait?.SetResult(true);
                 }
@@ -775,14 +788,24 @@ namespace DSharpPlus.VoiceNext
             PreparePacket(pck);
             await this.UdpClient.SendAsync(pck, pck.Length).ConfigureAwait(false);
 
-            var ipd = await this.UdpClient.ReceiveAsync().ConfigureAwait(false);
-            ReadPacket(ipd, out var ip, out var port);
-            this.DiscoveredEndpoint = new IpEndpoint
+            // fetch endpoint it it wasn't done already
+            IpEndpoint ownEndpoint;
+            if (!this.DiscoveredEndpoint.HasValue)
             {
-                Address = ip,
-                Port = port
-            };
-            this.Discord.DebugLogger.LogMessage(LogLevel.Debug, "VNext UDP", $"Endpoint discovery resulted in {ip}:{port}", DateTime.Now);
+                var ipd = await this.UdpClient.ReceiveAsync().ConfigureAwait(false);
+                ReadPacket(ipd, out var ip, out var port);
+                ownEndpoint = new IpEndpoint
+                {
+                    Address = ip,
+                    Port = port
+                };
+                this.DiscoveredEndpoint = ownEndpoint;
+                this.Discord.DebugLogger.LogMessage(LogLevel.Debug, "VNext UDP", $"Endpoint discovery resulted in {ip}:{port}", DateTime.Now);
+            }
+            else
+            {
+                ownEndpoint = this.DiscoveredEndpoint.Value;
+            }
 
             void PreparePacket(byte[] packet)
             {
@@ -816,8 +839,8 @@ namespace DSharpPlus.VoiceNext
                     Protocol = "udp",
                     Data = new VoiceSelectProtocolPayloadData
                     {
-                        Address = this.DiscoveredEndpoint.Address.ToString(),
-                        Port = (ushort)this.DiscoveredEndpoint.Port,
+                        Address = ownEndpoint.Address.ToString(),
+                        Port = (ushort)ownEndpoint.Port,
                         Mode = selectedEncryptionMode.Key
                     }
                 }
@@ -825,36 +848,32 @@ namespace DSharpPlus.VoiceNext
             var vsj = JsonConvert.SerializeObject(vsp, Formatting.None);
             await this.VoiceWs.SendMessageAsync(vsj).ConfigureAwait(false);
 
+            if (this.SenderTokenSource != null) this.SenderTokenSource.Cancel();
             this.SenderTokenSource = new CancellationTokenSource();
             this.SenderTask = Task.Run(this.VoiceSenderTask, this.SenderToken);
 
+            if (this.ReceiverTokenSource != null) this.ReceiverTokenSource.Cancel();
             this.ReceiverTokenSource = new CancellationTokenSource();
             this.ReceiverTask = Task.Run(this.UdpReceiverTask, this.ReceiverToken);
         }
 
-        private Task Stage2(VoiceSessionDescriptionPayload voiceSessionDescription)
+        private async Task Stage2(VoiceSessionDescriptionPayload voiceSessionDescription)
         {
             this.SelectedEncryptionMode = Sodium.SupportedModes[voiceSessionDescription.Mode.ToLowerInvariant()];
             this.Discord.DebugLogger.LogMessage(LogLevel.Debug, "VoiceNext", $"Discord updated encryption mode: {this.SelectedEncryptionMode}", DateTime.Now);
 
             // start keepalive
+            if (this.KeepaliveTokenSource != null) this.KeepaliveTokenSource.Cancel();
             this.KeepaliveTokenSource = new CancellationTokenSource();
             this.KeepaliveTask = this.KeepaliveAsync();
 
-            // send 3 packets of silence to get things going
-            var nullpcm = new byte[this.AudioFormat.CalculateSampleSize(20)];
-            for (var i = 0; i < 3; i++)
+            if (!this.IsInitialized)
             {
-                var nullopus = new byte[nullpcm.Length];
-                var nullopusmem = nullopus.AsMemory();
-                this.PreparePacket(nullpcm, ref nullopusmem);
-                this.EnqueuePacket(new VoicePacket(nullopusmem, 20));
+                this.IsInitialized = true;
+                this.ReadyWait.SetResult(true);
             }
 
-            this.IsInitialized = true;
-            this.ReadyWait.SetResult(true);
-
-            return Task.CompletedTask;
+            await this.ResumeAsync();
         }
 
         private async Task HandleDispatch(JObject jo)
@@ -880,7 +899,13 @@ namespace DSharpPlus.VoiceNext
                     this.Discord.DebugLogger.LogMessage(LogLevel.Debug, "VoiceNext", "OP4 received", DateTime.Now);
                     var vsd = opp.ToObject<VoiceSessionDescriptionPayload>();
                     this.Key = vsd.SecretKey;
-                    this.Sodium = new Sodium(this.Key.AsMemory());
+                    if (this.Sodium == null)
+                        this.Sodium = new Sodium(this.Key.AsMemory());
+                    else
+                    {
+                        lock (this.Sodium)
+                            this.Sodium.ChangeKey(this.Key.AsMemory());
+                    }
                     await this.Stage2(vsd).ConfigureAwait(false);
                     break;
 
@@ -981,7 +1006,7 @@ namespace DSharpPlus.VoiceNext
             // otherwise problems happen
             //this.Dispose();
 
-            if(e.CloseCode == 4014)
+            if (e.CloseCode == 4014)
             {
                 this.Dispose();
                 return;
@@ -992,6 +1017,7 @@ namespace DSharpPlus.VoiceNext
 
             if (!this.IsDisposed)
             {
+                this.Pause();
                 this.TokenSource.Cancel();
                 this.TokenSource = new CancellationTokenSource();
                 this.VoiceWs = this.Discord.Configuration.WebSocketClientFactory(this.Discord.Configuration.Proxy);
@@ -999,8 +1025,7 @@ namespace DSharpPlus.VoiceNext
                 this.VoiceWs.MessageReceived += this.VoiceWS_SocketMessage;
                 this.VoiceWs.Connected += this.VoiceWS_SocketOpened;
 
-                if (this.Resume) // emzi you dipshit
-                    await this.ConnectAsync().ConfigureAwait(false);
+                await this.ConnectAsync().ConfigureAwait(false);
             }
         }
 
@@ -1030,8 +1055,3 @@ namespace DSharpPlus.VoiceNext
         }
     }
 }
-
-// Naam you still owe me those noodles :^)
-// I remember
-// Alexa, how much is shipping to emzi
-// NL -> PL is 18.50€ for packages <=2kg it seems (https://www.postnl.nl/en/mail-and-parcels/parcels/international-parcel/)

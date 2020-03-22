@@ -46,7 +46,7 @@ namespace DSharpPlus.VoiceNext
                 throw new InvalidOperationException("What did I tell you?");
 
             this.Client = client;
-            
+
             this.Client.VoiceStateUpdated += this.Client_VoiceStateUpdate;
             this.Client.VoiceServerUpdated += this.Client_VoiceServerUpdate;
         }
@@ -89,7 +89,7 @@ namespace DSharpPlus.VoiceNext
             };
             var vsj = JsonConvert.SerializeObject(vsd, Formatting.None);
             await (channel.Discord as DiscordClient)._webSocketClient.SendMessageAsync(vsj).ConfigureAwait(false);
-            
+
             var vstu = await vstut.Task.ConfigureAwait(false);
             var vstup = new VoiceStateUpdatePayload
             {
@@ -103,7 +103,7 @@ namespace DSharpPlus.VoiceNext
                 GuildId = vsru.Guild.Id,
                 Token = vsru.VoiceToken
             };
-            
+
             var vnc = new VoiceNextConnection(this.Client, gld, channel, this.Configuration, vsrup, vstup);
             vnc.VoiceDisconnected += this.Vnc_VoiceDisconnected;
             await vnc.ConnectAsync().ConfigureAwait(false);
@@ -203,8 +203,8 @@ namespace DSharpPlus.VoiceNext
 
             if (this.VoiceServerUpdates.ContainsKey(gld.Id))
             {
-                this.VoiceServerUpdates.TryRemove(gld.Id, out var xe);
-                xe.SetResult(e);
+                if (this.VoiceServerUpdates.TryRemove(gld.Id, out var xe))
+                    xe.SetResult(e);
             }
         }
     }

@@ -16,7 +16,7 @@ namespace DSharpPlus.VoiceNext.Codec
 
         private RandomNumberGenerator CSPRNG { get; }
         private byte[] Buffer { get; }
-        private ReadOnlyMemory<byte> Key { get; }
+        private ReadOnlyMemory<byte> Key { get; set; }
 
         static Sodium()
         {
@@ -30,13 +30,18 @@ namespace DSharpPlus.VoiceNext.Codec
 
         public Sodium(ReadOnlyMemory<byte> key)
         {
+            ChangeKey(key);
+
+            this.CSPRNG = RandomNumberGenerator.Create();
+            this.Buffer = new byte[Interop.SodiumNonceSize];
+        }
+
+        public void ChangeKey(ReadOnlyMemory<byte> key)
+        {
             if (key.Length != Interop.SodiumKeySize)
                 throw new ArgumentException($"Invalid Sodium key size. Key needs to have a length of {Interop.SodiumKeySize} bytes.", nameof(key));
 
             this.Key = key;
-
-            this.CSPRNG = RandomNumberGenerator.Create();
-            this.Buffer = new byte[Interop.SodiumNonceSize];
         }
 
         public void GenerateNonce(ReadOnlySpan<byte> rtpHeader, Span<byte> target)
