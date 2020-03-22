@@ -36,6 +36,12 @@ namespace KrisMecn.Voice
             return this;
         }
 
+        public Converter IncreaseTempo(double rate, int inputSamplingRate = 44100)
+        {
+            _argBuilder.AddAudioFilter("asetrate", rate * inputSamplingRate);
+            return this;
+        }
+
         public DuplexProcessStream Start()
         {
             _info.Arguments = _argBuilder.Build("pipe:1"); // pipe to stdout
