@@ -11,11 +11,15 @@ using KrisMecn.Voice;
 
 namespace KrisMecn.Extensions
 {
-    static class CommandContextExtensions
+    static class VoiceCommandContextExtensions
     {
         public async static Task PlayFromURL(this CommandContext ctx, Uri uri)
         {
-            if (!uri.IsHttp()) return;
+            if (!uri.IsHttp())
+            {
+                Logger.Info($"{ctx.User.Username}#{ctx.User.Discriminator} tried to play a music stream from invalid URL: {uri}");
+                return;
+            }
 
             var downloader = ctx.Client.GetDownloader();
             var converter = new Converter().ToPCM();
@@ -102,7 +106,7 @@ namespace KrisMecn.Extensions
 
         private static Task VoiceConnection_VoiceSocketErrored(DSharpPlus.EventArgs.SocketErrorEventArgs e)
         {
-            Logger.Error(e.ToString());
+            Logger.Error(e);
             return Task.CompletedTask;
         }
     }

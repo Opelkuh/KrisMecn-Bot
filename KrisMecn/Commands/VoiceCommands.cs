@@ -1,10 +1,13 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Interactivity;
 using System.Threading.Tasks;
+using System.Linq;
 using KrisMecn.Extensions;
-using KrisMecn.Voice;
 using System;
 using System.Collections.Generic;
+using DSharpPlus.Entities;
+using System.Text;
 
 namespace KrisMecn.Commands
 {
@@ -36,16 +39,62 @@ namespace KrisMecn.Commands
             Aliases("youtube"),
             Description("Plays a YouTube video in your current voice channel")
         ]
-        public async Task PlayYoutube(CommandContext ctx, Uri url)
+        public async Task PlayYoutube(CommandContext ctx, [RemainingText] string urlOrQuery)
         {
-            // check if the provided url is a youtube link
-            if(!url.IsHttp() || !ALLOWED_YOUTUBE_HOSTS.Contains(url.Host))
+            Uri youtubeUri;
+
+            if (
+                Uri.TryCreate(urlOrQuery, UriKind.Absolute, out youtubeUri) &&
+                youtubeUri.IsHttp() &&
+                ALLOWED_YOUTUBE_HOSTS.Contains(youtubeUri.Host)
+            )
             {
-                Logger.Info($"{ctx.User.Username}#{ctx.User.Discriminator} tried to execute `yt` with invalid URL: {url}");
+                await ctx.PlayFromURL(youtubeUri).ConfigureAwait(false);
                 return;
             }
 
-            await ctx.PlayFromURL(url).ConfigureAwait(false);
+            var interactivity = ctx.Client.GetInteractivity();
+            var emoji = ctx.Client.GetEmojis();
+            var youtubeApi = ctx.Client.GetYoutubeAPI();
+
+            var searchRes = await youtubeApi.Search(urlOrQuery);
+            var searchResNum = searchRes.Count;
+
+            var embed = new DiscordEmbedBuilder()
+                .WithTitle($"Search results for: `{urlOrQuery}`")
+                .WithFooter(ctx.Member.DisplayName, ctx.Member.AvatarUrl)
+                .WithColor(new DiscordColor("#FF0000"))
+                .WithUrl($"https://www.youtube.com/results?search_query={Uri.EscapeUriString(urlOrQuery)}");
+
+            if (searchResNum > 0)
+            {
+                var description = new StringBuilder();
+                for (int i = 0; i < searchResNum; i++)
+                {
+                    description.AppendFormat("**{0}.** `{1}`", i + 1, searchRes[i].Snippet.Title);
+                    description.AppendLine();
+                }
+                embed.WithDescription(description.ToString());
+            }
+            else
+            {
+                embed.WithDescription("***Nothing***");
+            }
+
+            var resultMessage = await ctx.RespondAsync(embed: embed);
+            var emojis = emoji.PollNumberEmojis(searchResNum);
+
+            int selectedVid = await resultMessage.PollUserAsync(ctx.Member, emojis.ToArray(), 30);
+
+            if (0 <= selectedVid && selectedVid < searchResNum)
+            {
+                var videoId = searchRes[selectedVid].Id.VideoId;
+                var videoUri = new Uri($"https://youtu.be/{videoId}");
+
+                await ctx.PlayFromURL(videoUri);
+            }
+
+            await resultMessage.DeleteAsync();
         }
 
         [
