@@ -12,6 +12,9 @@ namespace KrisMecn.Entities
         [JsonProperty("token")]
         internal string Token = "Your token..";
 
+        [JsonProperty("googleApiKey")]
+        internal string GoogleApiKey = "Your Google API key...";
+
         [JsonProperty("prefix")]
         public string Prefix = "!";
 

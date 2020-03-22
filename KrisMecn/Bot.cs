@@ -67,7 +67,9 @@ namespace KrisMecn
             });
 
             // setup custom modules
+            _client.AddExtension(new EmojiExtension());
             _client.AddExtension(new DownloaderExtension());
+            _client.AddExtension(new YoutubeAPIExtension(config.GoogleApiKey));
 
             // hook events
             _client.Ready += Client_Ready;
