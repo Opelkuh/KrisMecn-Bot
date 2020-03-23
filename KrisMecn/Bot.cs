@@ -51,8 +51,10 @@ namespace KrisMecn
             _commands = _client.UseCommandsNext(new CommandsNextConfiguration()
             {
                 StringPrefixes = new string[] { config.Prefix },
-                CaseSensitive = false,                
-            }); ;
+                CaseSensitive = false,        
+                EnableDms = true,
+                EnableDefaultHelp = false,
+            });
 
             // setup interactivity
             _interactivity =_client.UseInteractivity(new InteractivityConfiguration()
