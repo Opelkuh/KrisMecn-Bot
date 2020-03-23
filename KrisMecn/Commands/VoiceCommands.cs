@@ -48,6 +48,18 @@ namespace KrisMecn.Commands
         }
 
         [
+            Command("vaporwave"),
+            Aliases("vw", "playvaporwave"),
+            Description(@"Plays """"""vaporwave"""""" from the provided link in your current voice channel")
+        ]
+        public async Task PlayVaporwave(CommandContext ctx, Uri url)
+        {
+            var converter = new Converter().IncreaseTempo(0.65);
+
+            await ctx.PlayFromURL(url, converter).ConfigureAwait(false);
+        }
+
+        [
             Command("yt"),
             Aliases("youtube"),
             Description("Plays a YouTube video in your current voice channel")
