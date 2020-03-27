@@ -5,6 +5,7 @@ using System.Text;
 using BooruSharp.Booru;
 using System.Threading.Tasks;
 using BooruSharp.Search.Post;
+using BooruSharp.Search;
 
 namespace KrisMecn.Extensions
 {
@@ -32,16 +33,37 @@ namespace KrisMecn.Extensions
                 BooruSite.Danbooru => _danbooru,
                 BooruSite.Gelbooru => _gelbooru,
                 BooruSite.Safebooru => _safebooru,
-                BooruSite.SankakuChannel => _sankakuComplex,
+                BooruSite.SankakuComplex => _sankakuComplex,
                 _ => throw new NotImplementedException(),
             };
         }
 
-        public Task<SearchResult> GetRandomImage(BooruSite site, string tags)
+        public string GetSiteName(BooruSite site)
+        {
+            return site switch
+            {
+                BooruSite.Rule34 => "Rule34.xxx",
+                BooruSite.Danbooru => "Danbooru",
+                BooruSite.Gelbooru => "Gelbooru",
+                BooruSite.Safebooru => "Safebooru",
+                BooruSite.SankakuComplex => "Sankaku Complex",
+                _ => throw new NotImplementedException(),
+            };
+        }
+
+        public async Task<SearchResult?> GetRandomImage(BooruSite site, string tags)
         {
             var client = GetClientFromSite(site);
 
-            return client.GetRandomImageAsync(tags);
+            try
+            {
+                return await client.GetRandomImageAsync(tags);
+            } catch(Exception e)
+            {
+                Logger.Error(e);
+
+                return null;
+            }
         }
     }
 
@@ -51,6 +73,6 @@ namespace KrisMecn.Extensions
         Danbooru,
         Gelbooru,
         Safebooru,
-        SankakuChannel,
+        SankakuComplex,
     }
 }
