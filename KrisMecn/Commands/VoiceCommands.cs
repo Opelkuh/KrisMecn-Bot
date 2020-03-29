@@ -2,16 +2,17 @@
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Interactivity;
 using System.Threading.Tasks;
-using System.Linq;
-using KrisMecn.Extensions;
 using System;
 using System.Collections.Generic;
 using DSharpPlus.Entities;
 using System.Text;
 using KrisMecn.Voice;
+using KrisMecn.Extensions;
+using KrisMecn.Attributes;
 
 namespace KrisMecn.Commands
 {
+    [RequireVoiceChannel]
     public class VoiceCommands : BaseKrisCommandModule
     {
         private readonly static HashSet<string> ALLOWED_YOUTUBE_HOSTS = new HashSet<string>(
