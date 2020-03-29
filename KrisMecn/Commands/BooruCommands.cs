@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using System.Text;
 
 namespace KrisMecn.Commands
 {
@@ -60,6 +61,8 @@ namespace KrisMecn.Commands
 
         private async Task GetRandomImage(CommandContext ctx, BooruSite site, string tags, DiscordColor? color = null)
         {
+            await ctx.TriggerTypingAsync();
+
             var booru = ctx.Client.GetBooru();
 
             // get string site name
@@ -88,15 +91,27 @@ namespace KrisMecn.Commands
             // build response embed
             eb
                 .AddField("URL", img.fileUrl.AbsoluteUri)
-                .AddField("Tags", string.Join(' ', img.tags))
-                .WithImageUrl(img.fileUrl.AbsoluteUri)
-                .WithAuthorFooter(ctx.Member, "Requested by: ");
+                .AddField("Tags", JoinTags(img.tags))
+                .WithImageUrl(img.fileUrl.AbsoluteUri);
 
             // add optional fields
+            if (ctx.Member != null) eb.WithAuthorFooter(ctx.Member, "Requested by: "); // `Member` is null in DM channels
             if (img.score.HasValue) eb.AddField("Likes", img.score.Value.ToString(), true);
             if (img.creation.HasValue) eb.AddField("Upload date (D.M.Y)", img.creation.Value.ToString("dd.MM.yyyy"), true);
 
             await ctx.RespondAsync(embed: eb).ConfigureAwait(false);
+        }
+
+        private string JoinTags(string[] data)
+        {
+            var sb = new StringBuilder();
+
+            foreach(string s in data)
+            {
+                sb.AppendFormat("`{0}` ", s);
+            }
+
+            return sb.ToString();
         }
     }
 }
