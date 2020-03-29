@@ -1,14 +1,17 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
+using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.VoiceNext;
 using KrisMecn.Entities;
 using KrisMecn.Extensions;
+using KrisMecn.Attributes;
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace KrisMecn
@@ -108,6 +111,14 @@ namespace KrisMecn
 
         private async Task Commands_CommandErrored(CommandErrorEventArgs e)
         {
+            try
+            {
+                // delete the users command
+                await e.Context.Message.DeleteAsync();
+            }
+            catch { }
+
+            // log error
             Logger.Error(
                 $"{e.Context.User.Username} tried executing '{e.Command?.QualifiedName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}"
             );
@@ -115,35 +126,30 @@ namespace KrisMecn
             // check if the error is a result of lack of required permissions
             if (e.Exception is ChecksFailedException ex)
             {
-                await e.Context.Member.SendMessageAsync("You don't have the required permission");  
+                if (e.Context.Member == null || ex.FailedChecks.Count <= 0) return;
+
+                var sb = new StringBuilder();
+                foreach(var check in ex.FailedChecks)
+                {
+                    switch(check)
+                    {
+                        case RequireNsfwAttribute _:
+                            sb.Append("Channel isn't set as NSFW.\n");
+                            break;
+                        case RequireVoiceChannelAttribute _:
+                            sb.Append("You have to be connected to a voice channel.\n");
+                            break;
+                    }
+                }
+
+                if(sb.Length > 0)
+                    await e.Context.Member.SendMessageAsync(sb.ToString());
             }
         }
 
         public async Task StartAsync()
         {
             await _client.ConnectAsync();
-
-            /*
-            var download = Downloader.Download("https://macross82-99.bandcamp.com/album/shibuya-meltdown", "");
-            var convert = new Converter().ToPCM().Start();
-
-            convert.ReadFrom(download);
-
-            using(var ms = new MemoryStream())
-            {
-                int totalRead = 0;
-                var buff = new byte[3840];
-                while (true)
-                {
-                    var read = await convert.Output.ReadAsync(buff);
-
-                    totalRead += read;
-                    Console.WriteLine("Read {0}. Total: {1}", read, totalRead);
-
-                    if (read == 0) break;
-                }
-            }
-            */
 
             await Task.Delay(-1);
         }
