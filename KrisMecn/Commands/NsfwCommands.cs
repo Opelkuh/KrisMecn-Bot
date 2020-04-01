@@ -7,7 +7,7 @@ using System.Text;
 
 namespace KrisMecn.Commands
 {
-    public class BooruCommands : BaseKrisCommandModule
+    public class NsfwCommands : BaseKrisCommandModule
     {
         private static DiscordColor _r34Color = new DiscordColor("#AAE5A3");
         private static DiscordColor _danbooruColor = new DiscordColor("#0073FF");

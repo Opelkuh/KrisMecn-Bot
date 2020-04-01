@@ -102,11 +102,17 @@ namespace KrisMecn
             return Task.CompletedTask;
         }
 
-        private Task Commands_CommandExecuted(CommandExecutionEventArgs e)
+        private async Task Commands_CommandExecuted(CommandExecutionEventArgs e)
         {
-            Logger.Info($"{e.Context.User.Username} successfully executed '{e.Command.QualifiedName}'");
+            try
+            {
+                // delete the users command
+                await e.Context.Message.DeleteAsync();
+            }
+            catch { }
 
-            return Task.CompletedTask;
+            // log that the command was finished
+            Logger.Info($"{e.Context.User.Username} successfully executed '{e.Command.QualifiedName}'");
         }
 
         private async Task Commands_CommandErrored(CommandErrorEventArgs e)
