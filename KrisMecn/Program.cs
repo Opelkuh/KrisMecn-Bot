@@ -1,6 +1,4 @@
-﻿using KrisMecn;
-
-namespace KrisMecn
+﻿namespace KrisMecn
 {
     class Program
     {
