@@ -1,5 +1,6 @@
 ﻿using KrisMecn.Enums;
 using System;
+using System.Text;
 
 namespace KrisMecn
 {
@@ -7,27 +8,43 @@ namespace KrisMecn
     {
         public static void Info(string message) => Log(LogLevel.Info, message);
         public static void Info(object message) => Log(LogLevel.Info, message);
+        public static void Info(string message, object data) => Log(LogLevel.Info, message, data);
 
         public static void Debug(string message) => Log(LogLevel.Debug, message);
         public static void Debug(object message) => Log(LogLevel.Debug, message);
+        public static void Debug(string message, object data) => Log(LogLevel.Debug, message, data);
 
         public static void Warn(string message) => Log(LogLevel.Warn, message);
         public static void Warn(object message) => Log(LogLevel.Warn, message);
+        public static void Warn(string message, object data) => Log(LogLevel.Warn, message, data);
 
         public static void Error(string message) => Log(LogLevel.Error, message);
         public static void Error(object message) => Log(LogLevel.Error, message);
+        public static void Error(string message, object data) => Log(LogLevel.Error, message, data);
 
         public static void Log(LogLevel level, object message)
             => Log(level, message.ToString());
-        public static void Log(LogLevel level, string message)
+        public static void Log(LogLevel level, string message, object data = null)
         {
+            // prepare log string
+            var sb = new StringBuilder()
+                .Append(DateTime.Now.ToString())
+                .Append("  -  ")
+                .Append(message);
+
+            // add optional data
+            if(data != null)
+            {
+                sb.Append(" - ")
+                  .Append(data.ToString());
+            }
+
+            // printe everything
             Console.Write("[");
             printLevel(level);
             Console.Write("] ");
-            Console.Write(DateTime.Now.ToString());
-            Console.Write("  -  ");
-            Console.Write(message);
-            Console.Write("\n");
+
+            Console.WriteLine(sb.ToString());
         }
 
         private static void printLevel(LogLevel level)

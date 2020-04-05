@@ -25,6 +25,12 @@ namespace KrisMecn.Voice.Builders
             return this;
         }
 
+        public YoutubeDLArgBuilder QuietOutput()
+        {
+            _sb.Append("-q ");
+            return this;
+        }
+
         public YoutubeDLArgBuilder Output(string output)
         {
             _sb.AppendFormat("-o {0} ", output);

@@ -17,6 +17,12 @@ namespace KrisMecn.Voice.Builders
             return this;
         }
 
+        public FfmpegArgBuilder LogLevel(FfmpegLogLevel level)
+        {
+            _sb.AppendFormat("-loglevel {0} ", level.GetHashCode());
+            return this;
+        }
+
         public FfmpegArgBuilder AudioChannels(byte numChannels)
         {
             _sb.AppendFormat("-ac {0} ", numChannels);
@@ -64,5 +70,18 @@ namespace KrisMecn.Voice.Builders
 
             return _sb.ToString();
         }
+    }
+
+    public enum FfmpegLogLevel
+    {
+        Quiet = -8,
+        Panic = 0,
+        Fatal = 8,
+        Error = 16,
+        Warning = 24,
+        Info = 32,
+        Verbose = 40,
+        Debug = 48,
+        Trace = 56,
     }
 }
