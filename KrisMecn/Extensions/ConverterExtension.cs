@@ -13,6 +13,14 @@ namespace KrisMecn.Extensions
             return ret;
         }
 
+        public Converter GetConverter(string filePath)
+        {
+            var ret = new Converter(filePath);
+            ret.ProcessErrorEvent += Converter_ProcessErrorEvent;
+
+            return ret;
+        }
+
         protected override void Setup(DiscordClient client)
         {
         }

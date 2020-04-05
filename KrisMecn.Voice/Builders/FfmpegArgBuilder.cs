@@ -13,7 +13,7 @@ namespace KrisMecn.Voice.Builders
 
         public FfmpegArgBuilder Input(string input)
         {
-            _sb.AppendFormat("-i {0} ", input);
+            _sb.AppendFormat(@"-i ""{0}"" ", input);
             return this;
         }
 

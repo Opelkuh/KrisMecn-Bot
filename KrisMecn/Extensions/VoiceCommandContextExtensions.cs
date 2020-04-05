@@ -37,6 +37,14 @@ namespace KrisMecn.Extensions
             await ctx.PlayVoiceStream(converterStream.Output).ConfigureAwait(false);
         }
 
+        public async static Task PlayFromFile(this CommandContext ctx, string path)
+        {
+            var converter = ctx.Client.GetConverter(path).ToPCM();
+            var converterStream = converter.Start();
+
+            await ctx.PlayVoiceStream(converterStream.Output);
+        }
+
         public async static Task PlayVoiceStream(this CommandContext ctx, Stream pcmStream)
         {
             var voiceConn = await ctx.GetVoiceConnection();
