@@ -10,10 +10,12 @@ namespace KrisMecn.Voice
         private ProcessStartInfo _info;
         private FfmpegArgBuilder _argBuilder;
 
-        public Converter() : base("ffmpeg", "-h")
+        public Converter() : this(FfmpegLogLevel.Warning) { }
+        public Converter(FfmpegLogLevel logLevel) : base("ffmpeg", "-h")
         {
             _argBuilder = new FfmpegArgBuilder()
-                .Input("-"); // we will pass input with stdin
+                .Input("-") // we will pass input with stdin
+                .LogLevel(logLevel);
 
             _info = new ProcessStartInfo
             {
@@ -60,12 +62,6 @@ namespace KrisMecn.Voice
                 ffmpeg.StandardInput.BaseStream,
                 ffmpeg.StandardOutput.BaseStream
             );
-        }
-
-        private static void OnErrorDataReceived(object data, DataReceivedEventArgs args)
-        {
-            Console.Error.WriteLine("`ffmpeg` error!");
-            Console.Error.WriteLine(args.Data);
         }
     }
 }

@@ -7,19 +7,24 @@ namespace KrisMecn.Voice
 {
     public class Downloader : ChildProcessHandler
     {
+        public bool QuietOutput = true;
+
         public Downloader() : base("youtube-dl", "-h") { }
 
         public Stream Download(string url, string format = "")
         {
-            string arguments = new YoutubeDLArgBuilder()
+            // build CLI arguments
+            var args = new YoutubeDLArgBuilder()
                 .Format(format)
-                .Output("-") // stream to stdout
-                .Build(url);
+                .Output("-"); // stream to stdout
 
+            if (QuietOutput) args.QuietOutput();
+
+            // prepare process info
             var ytdlInfo = new ProcessStartInfo
             {
                 FileName = Command,
-                Arguments = arguments,
+                Arguments = args.Build(url),
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -31,12 +36,6 @@ namespace KrisMecn.Voice
             ytdl.BeginErrorReadLine();
 
             return ytdl.StandardOutput.BaseStream;
-        }
-
-        private static void OnErrorDataReceived(object data, DataReceivedEventArgs args)
-        {
-            Console.Error.WriteLine("`youtube-dl` error!");
-            Console.Error.WriteLine(args.Data);
         }
     }
 }

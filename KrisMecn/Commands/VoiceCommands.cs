@@ -43,7 +43,7 @@ namespace KrisMecn.Commands
         ]
         public async Task PlayNightcore(CommandContext ctx, Uri url)
         {
-            var converter = new Converter().IncreaseTempo(1.25);
+            var converter = ctx.Client.GetConverter().IncreaseTempo(1.25);
 
             await ctx.PlayFromURL(url, converter).ConfigureAwait(false);
         }
@@ -55,7 +55,7 @@ namespace KrisMecn.Commands
         ]
         public async Task PlayVaporwave(CommandContext ctx, Uri url)
         {
-            var converter = new Converter().IncreaseTempo(0.65);
+            var converter = ctx.Client.GetConverter().IncreaseTempo(0.65);
 
             await ctx.PlayFromURL(url, converter).ConfigureAwait(false);
         }

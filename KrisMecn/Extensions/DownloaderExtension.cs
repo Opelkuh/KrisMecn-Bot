@@ -15,10 +15,17 @@ namespace KrisMecn.Extensions
             Downloader = new Downloader();
             
             Downloader.IsAvailable();
+
+            Downloader.ProcessErrorEvent += Downloader_ProcessErrorEvent;
         }
 
         protected override void Setup(DiscordClient client)
         {
+        }
+
+        private void Downloader_ProcessErrorEvent(object sender, System.Diagnostics.DataReceivedEventArgs e)
+        {
+            Logger.Error("Youtube-DL Error", e.Data);
         }
     }
 }
