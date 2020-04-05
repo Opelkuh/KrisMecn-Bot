@@ -3,11 +3,13 @@ using System.Diagnostics;
 
 namespace KrisMecn.Voice
 {
-    public class ChildProcessHandler
+    public abstract class ChildProcessHandler
     {
         protected string Command;
 
         private string _testArguments;
+
+        public event EventHandler<DataReceivedEventArgs> ProcessErrorEvent;
 
         internal ChildProcessHandler(string command, string testArguments = "")
         {
@@ -42,5 +44,8 @@ namespace KrisMecn.Voice
                 return;
             }
         }
+
+        protected virtual void OnErrorDataReceived(object data, DataReceivedEventArgs args)
+            => ProcessErrorEvent?.Invoke(data, args);
     }
 }

@@ -22,7 +22,7 @@ namespace KrisMecn.Extensions
             }
 
             // create converter if none is provided
-            if (converter == null) converter = new Converter();
+            if (converter == null) converter = ctx.Client.GetConverter();
             converter.ToPCM(); // set output to PCM
             
             var downloader = ctx.Client.GetDownloader();
