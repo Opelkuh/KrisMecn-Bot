@@ -7,14 +7,18 @@ namespace KrisMecn.Voice
 {
     public class Converter : ChildProcessHandler
     {
+        private const FfmpegLogLevel DEFAULT_LOG_LEVEL = FfmpegLogLevel.Warning;
+
         private ProcessStartInfo _info;
         private FfmpegArgBuilder _argBuilder;
 
-        public Converter() : this(FfmpegLogLevel.Warning) { }
-        public Converter(FfmpegLogLevel logLevel) : base("ffmpeg", "-h")
+        public Converter() : this(DEFAULT_LOG_LEVEL) { }
+        public Converter(string inputPath) : this(DEFAULT_LOG_LEVEL, inputPath) { }
+        public Converter(FfmpegLogLevel logLevel) : this(logLevel, "-") { } // default to stdin input
+        public Converter(FfmpegLogLevel logLevel, string inputPath) : base("ffmpeg", "-h")
         {
             _argBuilder = new FfmpegArgBuilder()
-                .Input("-") // we will pass input with stdin
+                .Input(inputPath)
                 .LogLevel(logLevel);
 
             _info = new ProcessStartInfo

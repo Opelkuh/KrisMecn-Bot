@@ -1,5 +1,6 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,9 +12,10 @@ namespace KrisMecn.Commands
     public class UtilityCommands : BaseKrisCommandModule
     {
         private const int MESSAGE_SIZE_LIMIT = 2000;
+        private const int HELP_CACHE_TTL = 1;
 
         private List<string> _helpCache;
-        private int _cachedCommands = -1;
+        private long _helpCacheExpire = Environment.TickCount64;
 
         [
             Command("help"),
@@ -23,10 +25,10 @@ namespace KrisMecn.Commands
         public async Task Help(CommandContext ctx)
         {
             int cmdCount = ctx.CommandsNext.RegisteredCommands.Count;
-            if (_helpCache == null || _cachedCommands != cmdCount)
+            if (_helpCache == null || _helpCacheExpire <= Environment.TickCount64)
             {
                 _helpCache = GenerateHelp(ctx.Prefix, ctx.CommandsNext.RegisteredCommands.Values);
-                _cachedCommands = cmdCount;
+                _helpCacheExpire = Environment.TickCount64 + HELP_CACHE_TTL;
             }
 
             // send help in parts
@@ -61,8 +63,11 @@ namespace KrisMecn.Commands
                         sb.Append(">");
                     }
 
-                    sb.Append(" - ")
-                      .Append(cmd.Description);
+                    if(!string.IsNullOrEmpty(cmd.Description))
+                    {
+                        sb.Append(" - ")
+                          .Append(cmd.Description);
+                    }
 
                     helpStrings.Add(sb.ToString());
                 }
