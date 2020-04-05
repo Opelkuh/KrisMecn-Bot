@@ -45,7 +45,6 @@ namespace KrisMecn
                 Token = config.Token,
                 TokenType = TokenType.Bot,
 
-                UseInternalLogHandler = true,
                 AutoReconnect = true,
                 GatewayCompressionLevel = GatewayCompressionLevel.Stream,
             });
@@ -76,6 +75,7 @@ namespace KrisMecn
             _client.AddExtension(new DownloaderExtension());
             _client.AddExtension(new BooruExtension());
             _client.AddExtension(new ConverterExtension());
+            _client.AddExtension(new SoundEffectWatcherExtension("./soundEffects"));
             _client.AddExtension(new YoutubeAPIExtension(config.GoogleApiKey));
 
             // hook events
