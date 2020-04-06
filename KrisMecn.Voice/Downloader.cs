@@ -30,10 +30,7 @@ namespace KrisMecn.Voice
                 RedirectStandardError = true,
             };
 
-            var ytdl = Process.Start(ytdlInfo);
-            ytdl.EnableRaisingEvents = true;
-            ytdl.ErrorDataReceived += OnErrorDataReceived;
-            ytdl.BeginErrorReadLine();
+            var ytdl = StartProcess(ytdlInfo);
 
             return ytdl.StandardOutput.BaseStream;
         }

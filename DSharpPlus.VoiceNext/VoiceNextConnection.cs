@@ -665,7 +665,11 @@ namespace DSharpPlus.VoiceNext
         /// Disconnects and disposes this voice connection.
         /// </summary>
         public void Disconnect()
-            => this.Dispose();
+        {
+            StopPlayback();
+            
+            this.Dispose();
+        }
 
         /// <summary>
         /// Stops the current transmit stream without closing the voice connection
@@ -705,7 +709,6 @@ namespace DSharpPlus.VoiceNext
             catch (Exception)
             { }
 
-            this.TransmitStream.CancelCurrentPlayback();
             lock (this.Opus)
             {
                 this.Opus?.Dispose();

@@ -249,8 +249,6 @@ namespace DSharpPlus.VoiceNext
         public void CancelCurrentPlayback()
         {
             StreamCloseTokenSource.Cancel();
-
-            StreamCloseTokenSource.Dispose();
             StreamCloseTokenSource = new CancellationTokenSource();
             
             IsPlaying = false;
