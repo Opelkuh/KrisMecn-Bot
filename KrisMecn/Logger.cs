@@ -1,11 +1,14 @@
 ﻿using KrisMecn.Enums;
 using System;
 using System.Text;
+using System.Threading;
 
 namespace KrisMecn
 {
     static class Logger
     {
+        private static Mutex _mutex = new Mutex();
+
         public static void Info(string message) => Log(LogLevel.Info, message);
         public static void Info(object message) => Log(LogLevel.Info, message);
         public static void Info(string message, object data) => Log(LogLevel.Info, message, data);
@@ -39,12 +42,18 @@ namespace KrisMecn
                   .Append(data.ToString());
             }
 
-            // printe everything
+            // wait for write permission
+            _mutex.WaitOne();
+
+            // print everything
             Console.Write("[");
             printLevel(level);
             Console.Write("] ");
 
             Console.WriteLine(sb.ToString());
+
+            // release mutex
+            _mutex.ReleaseMutex();
         }
 
         private static void printLevel(LogLevel level)
