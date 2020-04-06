@@ -52,15 +52,7 @@ namespace KrisMecn.Voice
         {
             _info.Arguments = _argBuilder.Build("pipe:1"); // pipe to stdout
 
-            var ffmpeg = Process.Start(_info);
-
-            ffmpeg.EnableRaisingEvents = true;
-            ffmpeg.ErrorDataReceived += OnErrorDataReceived;
-            ffmpeg.Exited += (a, b) =>
-            {
-                Console.WriteLine("ffmpeg exited {0}", ffmpeg.ExitCode);
-            };
-            ffmpeg.BeginErrorReadLine();
+            var ffmpeg = StartProcess(_info);
 
             return new DuplexProcessStream(
                 ffmpeg.StandardInput.BaseStream,

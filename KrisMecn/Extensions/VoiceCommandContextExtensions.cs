@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.VoiceNext;
 using KrisMecn.Voice;
@@ -24,25 +20,51 @@ namespace KrisMecn.Extensions
             // create converter if none is provided
             if (converter == null) converter = ctx.Client.GetConverter();
             converter.ToPCM(); // set output to PCM
-            
+
+            // prepare downloader
             var downloader = ctx.Client.GetDownloader();
+            
+            // start all processes
+            try
+            {
+                // start download
+                var downloadStream = downloader.Download(uri.AbsoluteUri);
+                var converterStream = converter.Start();
 
-            var downloadStream = downloader.Download(uri.AbsoluteUri);
-            var converterStream = converter.Start();
+                // pass downloaded data to converter and play the converted output
+                var downloadStreamTask = downloadStream.CopyToAsync(converterStream.Input);
+                var playTask = ctx.PlayVoiceStream(converterStream.Output);
 
-            // pass downloaded data to converter
-            _ = downloadStream.CopyToAsync(converterStream.Input);
+                // wait for one of the tasks to finish or fail
+                var anyTask = await Task.WhenAny(downloadStreamTask, playTask);
 
-            // play audio stream
-            await ctx.PlayVoiceStream(converterStream.Output).ConfigureAwait(false);
+                if (anyTask.Exception != null) throw anyTask.Exception;
+                if (anyTask.IsCanceled) throw new TaskCanceledException();
+
+                // close converter input
+                await converterStream.Input.FlushAsync();
+                converterStream.Input.Close();
+
+                // wait for all tasks to finish
+                await Task.WhenAll(downloadStreamTask, playTask);
+            } catch(Exception e)
+            {
+                Logger.Error("PlayFromURL error", e);
+            } finally
+            {
+                downloader.Dispose();
+                converter.Dispose();
+            }
         }
 
         public async static Task PlayFromFile(this CommandContext ctx, string path)
         {
-            var converter = ctx.Client.GetConverter(path).ToPCM();
-            var converterStream = converter.Start();
+            using(var converter = ctx.Client.GetConverter(path).ToPCM())
+            {
+                var converterStream = converter.Start();
 
-            await ctx.PlayVoiceStream(converterStream.Output);
+                await ctx.PlayVoiceStream(converterStream.Output);
+            }
         }
 
         public async static Task PlayVoiceStream(this CommandContext ctx, Stream pcmStream)
@@ -57,7 +79,7 @@ namespace KrisMecn.Extensions
 
             var voiceStream = voiceConn.GetTransmitStream();
 
-            _ = voiceStream.ReadFrom(pcmStream).ConfigureAwait(false);
+            await voiceStream.ReadFrom(pcmStream);
         }
 
         public async static Task<VoiceNextConnection> GetVoiceConnection(this CommandContext ctx)
@@ -92,10 +114,10 @@ namespace KrisMecn.Extensions
             return newConn;
         }
 
-        public async static Task DisconnectVoiceConnection(this CommandContext ctx)
+        public static Task DisconnectVoiceConnection(this CommandContext ctx)
         {
             // ignore non-public channels
-            if (ctx.Guild == null) return;
+            if (ctx.Guild == null) return Task.CompletedTask;
 
             // fetch voice library
             var vclient = ctx.Client.GetVoiceNext();
@@ -107,12 +129,13 @@ namespace KrisMecn.Extensions
             var existingConn = vclient.GetConnection(ctx.Guild);
 
             // ignore if the client isn't connected
-            if (existingConn == null) return;
+            if (existingConn == null) return Task.CompletedTask;
 
-            await existingConn.SendSpeakingAsync(false);
             existingConn.Disconnect();
 
             Logger.Info($"Disconnected from voice channel - {existingConn.Channel.Guild.Name} : {existingConn.Channel.Name}");
+
+            return Task.CompletedTask;
         }
 
         private static Task VoiceConnection_VoiceSocketErrored(DSharpPlus.EventArgs.SocketErrorEventArgs e)
