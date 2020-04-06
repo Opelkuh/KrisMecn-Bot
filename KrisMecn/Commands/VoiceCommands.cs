@@ -79,7 +79,6 @@ namespace KrisMecn.Commands
                 return;
             }
 
-            var interactivity = ctx.Client.GetInteractivity();
             var emoji = ctx.Client.GetEmojis();
             var youtubeApi = ctx.Client.GetYoutubeAPI();
 
@@ -112,15 +111,16 @@ namespace KrisMecn.Commands
 
             int selectedVid = await resultMessage.PollUserAsync(ctx.Member, emojis.ToArray(), 30);
 
-            if (0 <= selectedVid && selectedVid < searchResNum)
-            {
-                var videoId = searchRes[selectedVid].Id.VideoId;
-                var videoUri = new Uri($"https://youtu.be/{videoId}");
-
-                await ctx.PlayFromURL(videoUri);
-            }
-
+            // delete poll message
             await resultMessage.DeleteAsync();
+
+            // play selected video (if anything was selected)
+            if (selectedVid < 0 || selectedVid >= searchResNum) return;
+
+            var videoId = searchRes[selectedVid].Id.VideoId;
+            var videoUri = new Uri($"https://youtu.be/{videoId}");
+
+            await ctx.PlayFromURL(videoUri);
         }
 
         [
