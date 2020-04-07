@@ -1,5 +1,6 @@
 ﻿using DSharpPlus;
 using KrisMecn.Commands;
+using KrisMecn.Attributes;
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -72,7 +73,8 @@ namespace KrisMecn.Extensions
 
             // build command
             cmd.WithName(cmdName)
-                .WithOverload(overload);
+                .WithOverload(overload)
+                .WithExecutionCheck(new RequireVoiceChannelAttribute());
 
             // register command
             cmdNext.RegisterCommands(cmd);
