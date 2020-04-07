@@ -52,17 +52,17 @@ namespace KrisMecn.Voice
             RunningProcess = Process.Start(info);
             RunningProcess.EnableRaisingEvents = true;
             RunningProcess.ErrorDataReceived += OnErrorDataReceived;
-            RunningProcess.Exited += (a, b) =>
-            {
-                Console.WriteLine($"Process {Command} exited {0}", RunningProcess.ExitCode);
-            };
             RunningProcess.BeginErrorReadLine();
 
             return RunningProcess;
         }
 
         protected virtual void OnErrorDataReceived(object data, DataReceivedEventArgs args)
-            => ProcessErrorEvent?.Invoke(data, args);
+        {
+            if (string.IsNullOrEmpty(args.Data)) return;
+
+            ProcessErrorEvent?.Invoke(data, args);
+        }
 
         public void Dispose()
         {
