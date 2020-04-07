@@ -14,14 +14,19 @@ namespace KrisMecn.Commands
         public delegate Task DSharpPlusCommand(CommandContext ctx);
 
         public Type ModuleType => GetType();
-        public BaseCommandModule GetInstance(IServiceProvider services) 
+        public BaseCommandModule GetInstance(IServiceProvider services)
             => this;
 
         public DSharpPlusCommand GetPlaySoundEffectCommand(string filePath)
         {
-            return (ctx) =>
+            return async (ctx) =>
             {
-                return ctx.PlayFromFile(filePath);
+                try
+                {
+                    await ctx.Message.DeleteAsync();
+                } catch(Exception) { }
+
+                await ctx.PlayFromFile(filePath).ConfigureAwait(false);
             };
         }
     }

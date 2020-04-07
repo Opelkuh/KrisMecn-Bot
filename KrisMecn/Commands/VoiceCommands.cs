@@ -29,7 +29,7 @@ namespace KrisMecn.Commands
         [
             Command("play"),
             Aliases("p", "pl"),
-            Description("Plays audio from the provided link in your current voice channel")
+            Description("Plays audio from the provided link in your current voice channel. List of supported sites: https://ytdl-org.github.io/youtube-dl/supportedsites.html")
         ]
         public async Task Play(CommandContext ctx, Uri url)
         {
@@ -63,7 +63,7 @@ namespace KrisMecn.Commands
         [
             Command("yt"),
             Aliases("youtube"),
-            Description("Plays a YouTube video in your current voice channel")
+            Description("Searches YouTube with the provided query and lets you select the video that you want to play.")
         ]
         public async Task PlayYoutube(CommandContext ctx, [RemainingText] string urlOrQuery)
         {
