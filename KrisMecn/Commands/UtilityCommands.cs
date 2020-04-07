@@ -12,7 +12,7 @@ namespace KrisMecn.Commands
     public class UtilityCommands : BaseKrisCommandModule
     {
         private const int MESSAGE_SIZE_LIMIT = 2000;
-        private const int HELP_CACHE_TTL = 1;
+        private const int HELP_CACHE_TTL = 10000;
 
         private List<string> _helpCache;
         private long _helpCacheExpire = Environment.TickCount64;
