@@ -82,7 +82,7 @@ namespace KrisMecn.Extensions
             await voiceStream.ReadFrom(pcmStream);
         }
 
-        public async static Task<VoiceNextConnection> GetVoiceConnection(this CommandContext ctx)
+        public async static Task<VoiceNextConnection> GetVoiceConnection(this CommandContext ctx, bool onlyExisting = false)
         {
             // ignore non-public channels
             if (ctx.Guild == null) return null;
@@ -98,6 +98,9 @@ namespace KrisMecn.Extensions
 
             // return old connection if it exists
             if (existingConn != null) return existingConn;
+
+            // don't create a new one if `onlyExisting` is set
+            if (onlyExisting) return null;
 
             // create a new connection
             var targetChannel = ctx.Member?.VoiceState?.Channel;
