@@ -174,7 +174,17 @@ namespace DSharpPlus.VoiceNext
                         {
                             // alter volume
                             for (var i = 0; i < pcm16.Length; i++)
-                                pcm16[i] = (short)(pcm16[i] * this.VolumeModifier);
+                            {
+                                double modified = pcm16[i] * this.VolumeModifier;
+
+                                // clamp value
+                                short output;
+                                if (modified > short.MaxValue) output = short.MaxValue;
+                                else if (modified < short.MinValue) output = short.MinValue;
+                                else output = (short)modified;
+
+                                pcm16[i] = output;
+                            }
                         }
 
                         this.PcmBufferLength = 0;
