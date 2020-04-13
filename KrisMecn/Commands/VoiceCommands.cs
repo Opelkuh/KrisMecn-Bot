@@ -29,7 +29,7 @@ namespace KrisMecn.Commands
         [
             Command("play"),
             Aliases("p", "pl"),
-            Description("Plays audio from the provided link in your current voice channel. List of supported sites: https://ytdl-org.github.io/youtube-dl/supportedsites.html")
+            Description("Plays audio from the provided link in your current voice channel. Supports all sites that are supported by `youtube-dl`")
         ]
         public async Task Play(CommandContext ctx, Uri url)
         {
@@ -121,6 +121,37 @@ namespace KrisMecn.Commands
             var videoUri = new Uri($"https://youtu.be/{videoId}");
 
             await ctx.PlayFromURL(videoUri);
+        }
+
+        [
+            Command("volume"),
+            Aliases("v"),
+            Description("Changes the volume of the song that's currently playing")
+        ]
+        public async Task Volume(CommandContext ctx, string percentage)
+        {
+            double outVolume;
+            switch(percentage)
+            {
+                case "doprava":
+                    outVolume = 6;
+                    break;
+                default:
+                    double userInput;
+                    if (!double.TryParse(percentage, out userInput)) return;
+
+                    // clamp to max value of 600%
+                    outVolume = Math.Clamp(userInput / 100, 0, 6);
+
+                    break;
+            }
+            
+            // change volume
+            var voiceCon = await ctx.GetVoiceConnection(true);
+
+            if (voiceCon == null) return;
+
+            voiceCon.GetTransmitStream().VolumeModifier = outVolume;
         }
 
         [
