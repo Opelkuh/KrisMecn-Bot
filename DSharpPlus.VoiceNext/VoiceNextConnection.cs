@@ -217,7 +217,7 @@ namespace DSharpPlus.VoiceNext
             this.PlayingWait = null;
             this.PacketQueue = new BlockingCollection<VoicePacket>(
                 new ConcurrentQueue<VoicePacket>(),
-                1000 // cap the queue at 1000 packets
+                100 // cap the queue at 100 packets
             );
             this.KeepaliveTimestamps = new ConcurrentDictionary<ulong, long>();
             this.PauseEvent = new AsyncManualResetEvent(true);
