@@ -46,12 +46,17 @@ namespace KrisMecn.Commands
 
             foreach(var cmd in commands.Distinct())
             {
+                // ignore hidden commands
+                if (cmd.IsHidden) continue;
+                
                 List<string> helpStrings = new List<string>();
                 foreach(var ol in cmd.Overloads)
                 {
-                    var sb = new StringBuilder(prefix);
-                    
-                    sb.Append(cmd.Name);
+                    var sb = new StringBuilder();
+
+                    sb.Append("> **")
+                      .Append(prefix)
+                      .Append(cmd.Name);
                     
                     foreach(var arg in ol.Arguments)
                     {
@@ -63,10 +68,27 @@ namespace KrisMecn.Commands
                         sb.Append(">");
                     }
 
-                    if(!string.IsNullOrEmpty(cmd.Description))
+                    sb.Append("**");
+
+                    if (!string.IsNullOrEmpty(cmd.Description))
                     {
-                        sb.Append(" - ")
+                        sb.Append("\n*Description:* ") 
                           .Append(cmd.Description);
+                    }
+
+                    if(cmd.Aliases.Count > 0)
+                    {
+                        sb.Append("\n*Aliases:* ");
+
+                        int lastIndex = cmd.Aliases.Count - 1;
+                        // append all aliases except the last one
+                        for (int i = 0; i < lastIndex; i++)
+                        {
+                            sb.Append(prefix).Append(cmd.Aliases[i]).Append(", ");
+                        }
+
+                        // append last
+                        sb.Append(prefix).Append(cmd.Aliases[lastIndex]);
                     }
 
                     helpStrings.Add(sb.ToString());
@@ -84,7 +106,7 @@ namespace KrisMecn.Commands
             {
                 var readableName = Regex.Replace(moduleName, "((?<!^)[A-Z])", " $1").ToUpper();
 
-                hb.AppendFormat("__**{0}**__\n", readableName);
+                hb.AppendFormat("__**{0}**__\n\n", readableName);
                 foreach(var cmdHelp in moduleCmdHelp[moduleName])
                 {
                     if(hb.Length + cmdHelp.Length + 2 /* newline size */ > hb.MaxCapacity)
