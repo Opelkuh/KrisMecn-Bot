@@ -2,7 +2,7 @@
 using DSharpPlus.CommandsNext.Entities;
 using System;
 using System.Threading.Tasks;
-using KrisMecn.Extensions;
+using KrisMecn.Helpers.Extensions;
 
 namespace KrisMecn.Commands
 {

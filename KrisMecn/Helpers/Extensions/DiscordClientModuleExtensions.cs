@@ -1,7 +1,8 @@
 ﻿using DSharpPlus;
+using KrisMecn.Extensions;
 using KrisMecn.Voice;
 
-namespace KrisMecn.Extensions
+namespace KrisMecn.Helpers.Extensions
 {
     static class DiscordClientModuleExtensions
     {

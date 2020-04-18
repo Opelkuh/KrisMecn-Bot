@@ -70,7 +70,7 @@ namespace KrisMecn
                 EnableIncoming = false,
             });
 
-            // setup custom modules
+            // setup custom extensions
             _client.AddExtension(new EmojiExtension());
             _client.AddExtension(new DownloaderExtension());
             _client.AddExtension(new BooruExtension());

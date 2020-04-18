@@ -5,9 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace KrisMecn.Extensions
+namespace KrisMecn.Helpers.Extensions
 {
-    static class DiscordMessageExtension
+    static class DiscordMessageExtensions
     {
         public async static Task<int> PollUserAsync(this DiscordMessage msg, DiscordUser user, DiscordEmoji[] emoji, int timeout)
         {
