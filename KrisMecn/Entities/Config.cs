@@ -1,9 +1,7 @@
 ﻿using DSharpPlus.Entities;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+using Newtonsoft.Json.Converters;
 using System.IO;
-using System.Text;
 
 namespace KrisMecn.Entities
 {
@@ -17,6 +15,9 @@ namespace KrisMecn.Entities
 
         [JsonProperty("prefix")]
         public string Prefix = "!";
+
+        [JsonProperty("activity")]
+        public Activity Activity = new Activity();
 
         public static Config LoadFromFile(string path)
         {
@@ -33,5 +34,19 @@ namespace KrisMecn.Entities
                 sw.Write(JsonConvert.SerializeObject(this));
             }
         }
+    }
+
+    class Activity
+    {
+        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonProperty("status")]
+        public UserStatus Status = UserStatus.Online;
+
+        [JsonConverter(typeof(StringEnumConverter))]
+        [JsonProperty("type")]
+        public ActivityType Type = ActivityType.Custom;
+
+        [JsonProperty("text")]
+        public string Text = "";
     }
 }

@@ -2,6 +2,7 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
 using DSharpPlus.VoiceNext;
@@ -20,6 +21,7 @@ namespace KrisMecn
     {
         private const string CONFIG_PATH = "config.json";
 
+        private Config _config;
         private DiscordClient _client;
         private CommandsNextExtension _commands;
         private InteractivityExtension _interactivity;
@@ -37,12 +39,12 @@ namespace KrisMecn
                 return;
             }
 
-            var config = Config.LoadFromFile(CONFIG_PATH);
+            _config = Config.LoadFromFile(CONFIG_PATH);
 
             // setup discord client
             _client = new DiscordClient(new DiscordConfiguration()
             {
-                Token = config.Token,
+                Token = _config.Token,
                 TokenType = TokenType.Bot,
 
                 AutoReconnect = true,
@@ -52,7 +54,7 @@ namespace KrisMecn
             // setup commands
             _commands = _client.UseCommandsNext(new CommandsNextConfiguration()
             {
-                StringPrefixes = new string[] { config.Prefix },
+                StringPrefixes = new string[] { _config.Prefix },
                 CaseSensitive = false,        
                 EnableDms = true,
                 EnableDefaultHelp = false,
@@ -76,7 +78,7 @@ namespace KrisMecn
             _client.AddExtension(new BooruExtension());
             _client.AddExtension(new ConverterExtension());
             _client.AddExtension(new SoundEffectWatcherExtension("./soundEffects"));
-            _client.AddExtension(new YoutubeAPIExtension(config.GoogleApiKey));
+            _client.AddExtension(new YoutubeAPIExtension(_config.GoogleApiKey));       
 
             // hook events
             _client.Ready += Client_Ready;
@@ -156,7 +158,13 @@ namespace KrisMecn
 
         public async Task StartAsync()
         {
-            await _client.ConnectAsync();
+            // prepare activity
+            var activity = new DiscordActivity();
+            activity.ActivityType = _config.Activity.Type;
+            activity.Name = _config.Activity.Text;
+
+            // start connection
+            await _client.ConnectAsync(activity, _config.Activity.Status);
 
             await Task.Delay(-1);
         }
