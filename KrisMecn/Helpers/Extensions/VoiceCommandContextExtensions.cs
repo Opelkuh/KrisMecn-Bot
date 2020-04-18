@@ -3,9 +3,10 @@ using System.IO;
 using System.Threading.Tasks;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.VoiceNext;
+using KrisMecn.Extensions;
 using KrisMecn.Voice;
 
-namespace KrisMecn.Extensions
+namespace KrisMecn.Helpers.Extensions
 {
     static class VoiceCommandContextExtensions
     {
