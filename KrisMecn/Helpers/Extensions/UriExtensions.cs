@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace KrisMecn.Extensions
+namespace KrisMecn.Helpers.Extensions
 {
     public static class UriExtensions
     {

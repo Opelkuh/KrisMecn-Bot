@@ -1,14 +1,13 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using DSharpPlus.Interactivity;
 using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
 using DSharpPlus.Entities;
 using System.Text;
-using KrisMecn.Voice;
 using KrisMecn.Extensions;
 using KrisMecn.Attributes;
+using KrisMecn.Helpers.Extensions;
 
 namespace KrisMecn.Commands
 {
