@@ -12,11 +12,29 @@ namespace KrisMecn.Commands
 {
     public class UtilityCommands : BaseKrisCommandModule
     {
+        private const string UPTIME_TIMESTAMP_FORMAT = @"dd'd 'hh'h 'mm'm 'ss's'";
+
         private const int MESSAGE_SIZE_LIMIT = 2000;
         private const int HELP_CACHE_TTL = 10000;
 
         private List<string> _helpCache;
         private long _helpCacheExpire = Environment.TickCount64;
+
+        [
+            Hidden,
+            Command("uptime"),
+            Description("Sends you the uptime of the bot")
+        ]
+        public async Task Uptime(CommandContext ctx)
+        {
+            var startTimes = ctx.Client.GetBotContext().BotInstance.StartTimes;
+            
+            // create time strings
+            var startTimeStr = (DateTime.Now - startTimes.BotStart).ToString(UPTIME_TIMESTAMP_FORMAT);
+            var socketStartTimeStr = (DateTime.Now - startTimes.SocketStart).ToString(UPTIME_TIMESTAMP_FORMAT);
+
+            await ctx.ReplyToDM($"**Uptime**: {startTimeStr}\n**Current connection uptime**: {socketStartTimeStr}");
+        }
 
         [
             Command("help"),
@@ -37,8 +55,7 @@ namespace KrisMecn.Commands
             // this is to overcome the 2000 character limit
             foreach(var helpPart in _helpCache)
             {
-                if (ctx.Member == null) await ctx.RespondAsync(helpPart); // send reply to DMs
-                else await ctx.Member.SendMessageAsync(helpPart);
+                await ctx.ReplyToDM(helpPart);
             }
         }
 
