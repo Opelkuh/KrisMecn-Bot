@@ -18,6 +18,11 @@ namespace DSharpPlus.VoiceNext.EventArgs
         /// </summary>
         public uint SSRC { get; internal set; }
 
+        /// <summary>
+        /// Connection which raised the event
+        /// </summary>
+        public VoiceNextConnection Connection { get; internal set; }
+
         internal VoiceUserLeaveEventArgs(DiscordClient discord) : base(discord) { }
     }
 }
