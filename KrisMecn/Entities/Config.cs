@@ -19,6 +19,9 @@ namespace KrisMecn.Entities
         [JsonProperty("activity")]
         public Activity Activity = new Activity();
 
+        [JsonProperty("helpPrefix")]
+        public string HelpPrefix = "";
+
         public static Config LoadFromFile(string path)
         {
             using (var sr = new StreamReader(path))
