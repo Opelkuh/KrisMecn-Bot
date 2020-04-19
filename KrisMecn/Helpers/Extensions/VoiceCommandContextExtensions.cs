@@ -1,10 +1,12 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
+using DSharpPlus.EventArgs;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.VoiceNext;
-using KrisMecn.Extensions;
+using DSharpPlus.VoiceNext.EventArgs;
 using KrisMecn.Voice;
+using DSharpPlus.Entities;
 
 namespace KrisMecn.Helpers.Extensions
 {
@@ -117,6 +119,7 @@ namespace KrisMecn.Helpers.Extensions
             Logger.Info($"Connected to voice channel - {targetChannel.Guild.Name} : {targetChannel.Name}");
 
             newConn.VoiceSocketErrored += VoiceConnection_VoiceSocketErrored;
+            newConn.UserLeft += VoiceConnection_UserLeft;
 
             return newConn;
         }
@@ -145,10 +148,41 @@ namespace KrisMecn.Helpers.Extensions
             return Task.CompletedTask;
         }
 
-        private static Task VoiceConnection_VoiceSocketErrored(DSharpPlus.EventArgs.SocketErrorEventArgs e)
+        private static Task VoiceConnection_VoiceSocketErrored(SocketErrorEventArgs e)
         {
             Logger.Error(e);
             return Task.CompletedTask;
+        }
+
+        private static Task VoiceConnection_UserLeft(VoiceUserLeaveEventArgs e)
+        {
+            // ignore event if the channel isn't empty
+            if (!IsEmptyVoiceChannel(e.Connection.Channel, e.User)) return Task.CompletedTask;
+
+            Task.Run(async () =>
+            {
+                await Task.Delay(TimeSpan.FromSeconds(30));
+
+                if (!IsEmptyVoiceChannel(e.Connection.Channel)) return;
+
+                e.Connection.Disconnect();
+            });
+
+            // don't wait for the delayed task
+            return Task.CompletedTask;
+        }
+
+        private static bool IsEmptyVoiceChannel(DiscordChannel channel, DiscordUser ignoredUser = null)
+        {
+            if (channel.Type != DSharpPlus.ChannelType.Voice) throw new Exception("IsEmptyChannel called with non-voice channel");
+
+            foreach(var user in channel.Users)
+            {
+                // return false on first non-bot user
+                if (!user.IsBot && user.Id != ignoredUser?.Id) return false;
+            }
+
+            return true;
         }
     }
 }
