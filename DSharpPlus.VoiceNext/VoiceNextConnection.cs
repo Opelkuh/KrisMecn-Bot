@@ -974,7 +974,11 @@ namespace DSharpPlus.VoiceNext
                             this.Opus.DestroyDecoder(opus);
                     }
 
-                    await this._userJoined.InvokeAsync(new VoiceUserJoinEventArgs(this.Discord) { User = usrj, SSRC = ujpd.SSRC }).ConfigureAwait(false);
+                    await this._userJoined.InvokeAsync(new VoiceUserJoinEventArgs(this.Discord) { 
+                        User = usrj,
+                        SSRC = ujpd.SSRC,
+                        Connection = this,
+                    }).ConfigureAwait(false);
                     break;
 
                 case 13: // CLIENT_DISCONNECTED
@@ -990,7 +994,8 @@ namespace DSharpPlus.VoiceNext
                     await this._userLeft.InvokeAsync(new VoiceUserLeaveEventArgs(this.Discord)
                     {
                         User = usrl,
-                        SSRC = txssrc.Key
+                        SSRC = txssrc.Key,
+                        Connection = this,
                     }).ConfigureAwait(false);
                     break;
 
