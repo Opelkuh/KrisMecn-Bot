@@ -793,7 +793,7 @@ namespace DSharpPlus.VoiceNext
 
             // fetch endpoint it it wasn't done already
             IpEndpoint ownEndpoint;
-            if (!this.DiscoveredEndpoint.HasValue)
+            try
             {
                 var ipd = await this.UdpClient.ReceiveAsync().ConfigureAwait(false);
                 ReadPacket(ipd, out var ip, out var port);
@@ -804,11 +804,22 @@ namespace DSharpPlus.VoiceNext
                 };
                 this.DiscoveredEndpoint = ownEndpoint;
                 this.Discord.DebugLogger.LogMessage(LogLevel.Debug, "VNext UDP", $"Endpoint discovery resulted in {ip}:{port}", DateTime.Now);
-            }
-            else
+            } catch(Exception e)
             {
-                ownEndpoint = this.DiscoveredEndpoint.Value;
+                this.Discord.DebugLogger.LogMessage(LogLevel.Error, "VNext UDP", "Endpoint discovery failed", DateTime.Now, e);
+
+                // fallback to last value if present
+                if(this.DiscoveredEndpoint.HasValue)
+                {
+                    ownEndpoint = this.DiscoveredEndpoint.Value;
+                    this.Discord.DebugLogger.LogMessage(LogLevel.Info, "VNext UDP", "Endpoint discovery used old endpoint", DateTime.Now, e);
+                }
+                else
+                {
+                    throw e;
+                }
             }
+            
 
             void PreparePacket(byte[] packet)
             {
@@ -820,6 +831,8 @@ namespace DSharpPlus.VoiceNext
 
             void ReadPacket(byte[] packet, out System.Net.IPAddress decodedIp, out ushort decodedPort)
             {
+                if (packet.Length != 70) throw new Exception($"Recieved invalid IP discovery data. Expected length 70 but got {packet.Length}");
+
                 var packetSpan = packet.AsSpan();
 
                 var ipString = Utilities.UTF8.GetString(packet, 4, 64 /* 70 - 6 */).TrimEnd('\0');
