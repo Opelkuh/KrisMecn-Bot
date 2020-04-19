@@ -24,7 +24,7 @@ namespace KrisMecn.Commands
             sb.AppendFormat(
                 "`{0}` @ `{1}` requested `{2}`",
                 ctx.User.GetFullName(),
-                ctx.Guild != null ? ctx.Guild.Name : "<DMs>",
+                ctx.Guild?.Name ?? "<DMs>",
                 ctx.Command.Name
             );
 
