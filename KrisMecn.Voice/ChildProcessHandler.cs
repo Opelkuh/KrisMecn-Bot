@@ -67,7 +67,14 @@ namespace KrisMecn.Voice
         public void Dispose()
         {
             if (RunningProcess != null)
+            {
+                try
+                {
+                    RunningProcess.Kill();
+                } catch(Exception) { }
+
                 RunningProcess.Dispose();
+            }
         }
     }
 }
