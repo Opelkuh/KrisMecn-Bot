@@ -82,6 +82,7 @@ namespace KrisMecn
 
             // hook events
             _client.Ready += Client_Ready;
+            _client.SocketOpened += Client_SocketOpened;
             _client.ClientErrored += Client_ClientError;
 
             _commands.CommandExecuted += Commands_CommandExecuted;
@@ -94,6 +95,13 @@ namespace KrisMecn
         private Task Client_Ready(ReadyEventArgs e)
         {
             Logger.Info("Client is ready to process events.");
+
+            return Task.CompletedTask;
+        }
+
+        private Task Client_SocketOpened()
+        {
+            StartTimes.SocketStart = DateTime.Now;
 
             return Task.CompletedTask;
         }
