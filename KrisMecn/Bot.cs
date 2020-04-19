@@ -20,14 +20,13 @@ namespace KrisMecn
     class Bot
     {
         private const string CONFIG_PATH = "config.json";
-
-        private Config _config;
         private DiscordClient _client;
         private CommandsNextExtension _commands;
         private InteractivityExtension _interactivity;
         private VoiceNextExtension _voice;
 
         public StartTimes StartTimes { get; } = new StartTimes();
+        public Config Config { get; }
 
         public Bot()
         {
@@ -39,12 +38,12 @@ namespace KrisMecn
                 return;
             }
 
-            _config = Config.LoadFromFile(CONFIG_PATH);
+            Config = Config.LoadFromFile(CONFIG_PATH);
 
             // setup discord client
             _client = new DiscordClient(new DiscordConfiguration()
             {
-                Token = _config.Token,
+                Token = Config.Token,
                 TokenType = TokenType.Bot,
 
                 AutoReconnect = true,
@@ -54,7 +53,7 @@ namespace KrisMecn
             // setup commands
             _commands = _client.UseCommandsNext(new CommandsNextConfiguration()
             {
-                StringPrefixes = new string[] { _config.Prefix },
+                StringPrefixes = new string[] { Config.Prefix },
                 CaseSensitive = false,        
                 EnableDms = true,
                 EnableDefaultHelp = false,
@@ -73,12 +72,13 @@ namespace KrisMecn
             });
 
             // setup custom extensions
+            _client.AddExtension(new BotContextExtension(this));
             _client.AddExtension(new EmojiExtension());
             _client.AddExtension(new DownloaderExtension());
             _client.AddExtension(new BooruExtension());
             _client.AddExtension(new ConverterExtension());
             _client.AddExtension(new SoundEffectWatcherExtension("./soundEffects"));
-            _client.AddExtension(new YoutubeAPIExtension(_config.GoogleApiKey));       
+            _client.AddExtension(new YoutubeAPIExtension(Config.GoogleApiKey));
 
             // hook events
             _client.Ready += Client_Ready;
@@ -160,11 +160,11 @@ namespace KrisMecn
         {
             // prepare activity
             var activity = new DiscordActivity();
-            activity.ActivityType = _config.Activity.Type;
-            activity.Name = _config.Activity.Text;
+            activity.ActivityType = Config.Activity.Type;
+            activity.Name = Config.Activity.Text;
 
             // start connection
-            await _client.ConnectAsync(activity, _config.Activity.Status);
+            await _client.ConnectAsync(activity, Config.Activity.Status);
 
             await Task.Delay(-1);
         }

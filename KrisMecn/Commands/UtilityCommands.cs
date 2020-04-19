@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using KrisMecn.Helpers.Extensions;
 
 namespace KrisMecn.Commands
 {
@@ -24,10 +25,11 @@ namespace KrisMecn.Commands
         ]
         public async Task Help(CommandContext ctx)
         {
-            int cmdCount = ctx.CommandsNext.RegisteredCommands.Count;
             if (_helpCache == null || _helpCacheExpire <= Environment.TickCount64)
             {
-                _helpCache = GenerateHelp(ctx.Prefix, ctx.CommandsNext.RegisteredCommands.Values);
+                string helpPrefix = ctx.Client.GetBotContext().BotInstance.Config.HelpPrefix;
+
+                _helpCache = GenerateHelp(ctx.Prefix, ctx.CommandsNext.RegisteredCommands.Values, helpPrefix);
                 _helpCacheExpire = Environment.TickCount64 + HELP_CACHE_TTL;
             }
 
@@ -40,7 +42,7 @@ namespace KrisMecn.Commands
             }
         }
 
-        private List<string> GenerateHelp(string prefix, IEnumerable<Command> commands)
+        private List<string> GenerateHelp(string commandPrefix, IEnumerable<Command> commands, string helpPrefix = "")
         {
             var moduleCmdHelp = new Dictionary<string, List<string>>();
 
@@ -55,7 +57,7 @@ namespace KrisMecn.Commands
                     var sb = new StringBuilder();
 
                     sb.Append("> **")
-                      .Append(prefix)
+                      .Append(commandPrefix)
                       .Append(cmd.Name);
                     
                     foreach(var arg in ol.Arguments)
@@ -84,11 +86,11 @@ namespace KrisMecn.Commands
                         // append all aliases except the last one
                         for (int i = 0; i < lastIndex; i++)
                         {
-                            sb.Append(prefix).Append(cmd.Aliases[i]).Append(", ");
+                            sb.Append(commandPrefix).Append(cmd.Aliases[i]).Append(", ");
                         }
 
                         // append last
-                        sb.Append(prefix).Append(cmd.Aliases[lastIndex]);
+                        sb.Append(commandPrefix).Append(cmd.Aliases[lastIndex]);
                     }
 
                     helpStrings.Add(sb.ToString());
@@ -101,7 +103,12 @@ namespace KrisMecn.Commands
 
             // generate final help string
             var ret = new List<string>();
+
             var hb = new StringBuilder(MESSAGE_SIZE_LIMIT, MESSAGE_SIZE_LIMIT);
+
+            // add prefix
+            hb.Append(helpPrefix);
+
             foreach(var moduleName in moduleCmdHelp.Keys)
             {
                 var readableName = Regex.Replace(moduleName, "((?<!^)[A-Z])", " $1").ToUpper();
