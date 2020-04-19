@@ -83,6 +83,8 @@ namespace KrisMecn
             // hook events
             _client.Ready += Client_Ready;
             _client.SocketOpened += Client_SocketOpened;
+            _client.SocketClosed += Client_SocketClosed;
+            _client.SocketErrored += Client_SocketErrored;
             _client.ClientErrored += Client_ClientError;
 
             _commands.CommandExecuted += Commands_CommandExecuted;
@@ -103,8 +105,25 @@ namespace KrisMecn
         {
             StartTimes.SocketStart = DateTime.Now;
 
+            Logger.Info("Gateway connection established");
+
             return Task.CompletedTask;
         }
+
+        private Task Client_SocketClosed(SocketCloseEventArgs e)
+        {
+            Logger.Info($"Gateway connection closed. Code: {e.CloseCode}");
+
+            return Task.CompletedTask;
+        }
+
+        private Task Client_SocketErrored(SocketErrorEventArgs e)
+        {
+            Logger.Error("Gateway connection error", e.Exception);
+
+            return Task.CompletedTask;
+        }
+
 
         private Task Client_ClientError(ClientErrorEventArgs e)
         {
