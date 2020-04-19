@@ -80,6 +80,9 @@ namespace KrisMecn.Helpers.Extensions
 
             var voiceStream = voiceConn.GetTransmitStream();
 
+            // reset volume to 1
+            voiceStream.VolumeModifier = 1;
+
             await voiceStream.ReadFrom(pcmStream);
         }
 
