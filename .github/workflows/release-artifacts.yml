@@ -1,0 +1,38 @@
+name: Release artifact Build
+
+on:
+  release:
+    types: [published]
+    
+env:
+  ARCHITECTURES: win-x64;win-arm64;linux-x64;linux-musl-x64;linux-arm;osx-x64
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.101
+    - name: Build
+      shell: bash
+      working-directory: KrisMecn
+      run: |
+        mkdir output
+        dotnet publish --configuration Release --output crossplatform
+        cd crossplatform/ && tar -zcvf ../output/kris-mecn-${GITHUB_REF##*/}.tar.gz * && cd -
+
+        for arch in $(echo $ARCHITECTURES | tr ";" "\n")
+        do
+          dotnet publish --configuration Release --runtime $arch --output $arch --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=true
+          cd $arch/ && tar -zcvf ../output/kris-mecn-${GITHUB_REF##*/}-$arch.tar.gz * && cd -
+        done
+    - name: Add artifacts to release
+      uses: Roang-zero1/github-upload-release-artifacts-action@v2.1.0
+      with:
+        args: KrisMecn/output/
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
