@@ -24,7 +24,7 @@ jobs:
         for arch in $(echo $ARCHITECTURES | tr ";" "\n")
         do
           dotnet publish --configuration Release --runtime $arch --output $arch --self-contained false
-          cd $arch/ && tar -zcvf ../output/kris-mecn-${GITHUB_REF##*/}-$base.tar.gz * && cd -
+          cd $arch/ && tar -zcvf ../output/kris-mecn-${GITHUB_REF##*/}-$arch.tar.gz * && cd -
         done
     - name: Add artifacts to release
       uses: Roang-zero1/github-upload-release-artifacts-action@v2.1.0
