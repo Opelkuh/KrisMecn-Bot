@@ -26,14 +26,10 @@ jobs:
           dotnet publish --configuration Release --runtime $arch --output $arch --self-contained false
           cd $arch/ && tar -zcvf ../output/kris-mecn-${GITHUB_REF##*/}-$base.tar.gz * && cd -
         done
-  publish-to-release:
-    needs: [build-release]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Add artifacts to release
-        uses: Roang-zero1/github-upload-release-artifacts-action@v2.1.0
-        with:
-          args: KrisMecn/output/
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Add artifacts to release
+      uses: Roang-zero1/github-upload-release-artifacts-action@v2.1.0
+      with:
+        args: KrisMecn/output/
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
