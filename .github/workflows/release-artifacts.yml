@@ -21,9 +21,12 @@ jobs:
       working-directory: KrisMecn
       run: |
         mkdir output
+        dotnet publish --configuration Release --output crossplatform
+        cd crossplatform/ && tar -zcvf ../output/kris-mecn-${GITHUB_REF##*/}.tar.gz * && cd -
+
         for arch in $(echo $ARCHITECTURES | tr ";" "\n")
         do
-          dotnet publish --configuration Release --runtime $arch --output $arch --self-contained false
+          dotnet publish --configuration Release --runtime $arch --output $arch --self-contained true -p:PublishSingleFile=false -p:PublishTrimmed=true
           cd $arch/ && tar -zcvf ../output/kris-mecn-${GITHUB_REF##*/}-$arch.tar.gz * && cd -
         done
     - name: Add artifacts to release
