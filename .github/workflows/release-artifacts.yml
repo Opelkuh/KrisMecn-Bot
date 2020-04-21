@@ -30,6 +30,7 @@ jobs:
     needs: [build-release]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Add artifacts to release
         uses: Roang-zero1/github-upload-release-artifacts-action@v2.1.0
         with:
