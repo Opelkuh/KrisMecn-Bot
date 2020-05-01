@@ -15,7 +15,7 @@ namespace KrisMecn.Voice
         public Converter() : this(DEFAULT_LOG_LEVEL) { }
         public Converter(string inputPath) : this(DEFAULT_LOG_LEVEL, inputPath) { }
         public Converter(FfmpegLogLevel logLevel) : this(logLevel, "-") { } // default to stdin input
-        public Converter(FfmpegLogLevel logLevel, string inputPath) : base("ffmpeg", "-h")
+        public Converter(FfmpegLogLevel logLevel, string inputPath) : base("ffmpeg", "-hide_banner -h")
         {
             _argBuilder = new FfmpegArgBuilder()
                 .Input(inputPath)
@@ -50,7 +50,7 @@ namespace KrisMecn.Voice
 
         public DuplexProcessStream Start()
         {
-            _info.Arguments = _argBuilder.Build("pipe:1"); // pipe to stdout
+            _info.Arguments = _argBuilder.Build("pipe::"); // pipe to stdout
 
             var ffmpeg = StartProcess(_info);
 
