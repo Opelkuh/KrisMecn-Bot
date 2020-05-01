@@ -6,7 +6,7 @@ namespace KrisMecn.Helpers.Extensions
 {
     static class DiscordClientModuleExtensions
     {
-        public static Downloader GetDownloader(this DiscordClient client) => client.GetExtension<DownloaderExtension>().Downloader;
+        public static Downloader GetDownloader(this DiscordClient client) => client.GetExtension<DownloaderExtension>().GetDownloader();
         public static Converter GetConverter(this DiscordClient client) => client.GetExtension<ConverterExtension>().GetConverter();
         public static Converter GetConverter(this DiscordClient client, string filePath) => client.GetExtension<ConverterExtension>().GetConverter(filePath);
         public static BotContextExtension GetBotContext(this DiscordClient client) => client.GetExtension<BotContextExtension>();

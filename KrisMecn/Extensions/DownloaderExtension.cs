@@ -8,15 +8,17 @@ namespace KrisMecn.Extensions
 {
     class DownloaderExtension : BaseExtension
     {
-        public Downloader Downloader { get; private set; }
-
         public DownloaderExtension() : base()
         {
-            Downloader = new Downloader();
-            
-            Downloader.IsAvailable();
+            new Downloader().IsAvailable();
+        }
 
-            Downloader.ProcessErrorEvent += Downloader_ProcessErrorEvent;
+        public Downloader GetDownloader()
+        {
+            var ret = new Downloader();
+            ret.ProcessErrorEvent += Downloader_ProcessErrorEvent;
+
+            return ret;
         }
 
         protected override void Setup(DiscordClient client)
