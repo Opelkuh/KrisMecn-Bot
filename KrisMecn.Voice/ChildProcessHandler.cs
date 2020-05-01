@@ -28,6 +28,7 @@ namespace KrisMecn.Voice
                     FileName = Command,
                     Arguments = _testArguments,
                     CreateNoWindow = true,
+                    RedirectStandardOutput = true,
                 };
 
                 var process = Process.Start(processInfo);
