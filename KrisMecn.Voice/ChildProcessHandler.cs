@@ -29,15 +29,16 @@ namespace KrisMecn.Voice
                     Arguments = _testArguments,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
-                };
+                }; 
 
                 var process = Process.Start(processInfo);
 
-                process.WaitForExit();
+                _ = process.StandardOutput.ReadToEnd();
+                process.WaitForExit(3000);
 
                 if (process.ExitCode != 0)
                 {
-                    throw new Exception($"`{Command}` returned non-zero code!");
+                    throw new Exception($"`{Command}` returned non-zero code ({process.ExitCode})!");
                 }
             }
             catch (Exception e)
