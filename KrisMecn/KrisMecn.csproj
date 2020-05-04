@@ -7,15 +7,15 @@
 
   <ItemGroup>
     <PackageReference Include="BooruSharp" Version="2.0.3" />
-    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00669" />
-    <PackageReference Include="DSharpPlus.CommandsNext" Version="4.0.0-nightly-00669" />
-    <PackageReference Include="DSharpPlus.Interactivity" Version="4.0.0-nightly-00669" />
     <PackageReference Include="Google.Apis.YouTube.v3" Version="1.44.1.1869" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DSharpPlus\DSharpPlus.csproj" />
     <ProjectReference Include="..\DSharpPlus.VoiceNext\DSharpPlus.VoiceNext.csproj" />
+    <ProjectReference Include="..\DSharpPlus.CommandsNext\DSharpPlus.CommandsNext.csproj" />
+    <ProjectReference Include="..\DSharpPlus.Interactivity\DSharpPlus.Interactivity.csproj" />
     <ProjectReference Include="..\KrisMecn.Voice\KrisMecn.Voice.csproj" />
   </ItemGroup>
 

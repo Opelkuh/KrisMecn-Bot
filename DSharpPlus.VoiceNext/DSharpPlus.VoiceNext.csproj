@@ -9,14 +9,14 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="DSharpPlus" Version="4.0.0-nightly-00669" />
-  </ItemGroup>
-
   <PropertyGroup>
     <PackageId>DSharpPlus.VoiceNext</PackageId>
     <Description>Voice implementation for DSharpPlus.</Description>
     <PackageTags>discord, discord-api, bots, discord-bots, chat, dsharp, dsharpplus, csharp, dotnet, vb-net, fsharp, audio, voice, radio, music</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DSharpPlus\DSharpPlus.csproj" />
+  </ItemGroup>
   
 </Project>
