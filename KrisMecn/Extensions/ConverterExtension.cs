@@ -5,6 +5,11 @@ namespace KrisMecn.Extensions
 {
     class ConverterExtension : BaseExtension
     {
+        public ConverterExtension()
+        {
+            new Converter().IsAvailable();
+        }
+
         public Converter GetConverter()
         {
             var ret = new Converter();
