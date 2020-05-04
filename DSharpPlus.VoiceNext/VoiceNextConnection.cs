@@ -933,7 +933,7 @@ namespace DSharpPlus.VoiceNext
                     {
                         Speaking = spd.Speaking,
                         SSRC = spd.SSRC.Value,
-                        User = this.Discord.InternalGetCachedUser(spd.UserId.Value)
+                        User = this.Discord.GetCachedOrEmptyUserInternal(spd.UserId.Value)
                     };
 
                     if (spk.User != null && this.TransmittingSSRCs.TryGetValue(spk.SSRC, out var txssrc5) && txssrc5.Id == 0)
