@@ -2245,7 +2245,7 @@ namespace DSharpPlus
         internal async Task OnReconnectAsync()
         {
             this.DebugLogger.LogMessage(LogLevel.Info, "Websocket", "Received OP 7 - Reconnect.", DateTime.Now);
-            await this.InternalReconnectAsync(code: 1000, message: "OP7 acknowledged").ConfigureAwait(false);
+            await this.InternalReconnectAsync(code: 4000, message: "OP7 acknowledged").ConfigureAwait(false);
         }
 
         internal async Task OnInvalidateSessionAsync(bool data)
