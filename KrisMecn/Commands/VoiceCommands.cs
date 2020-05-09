@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using DSharpPlus.Entities;
 using System.Text;
-using KrisMecn.Extensions;
 using KrisMecn.Attributes;
 using KrisMecn.Helpers.Extensions;
 
@@ -24,6 +23,7 @@ namespace KrisMecn.Commands
                 "youtu.be"
             }
         );
+        private readonly static DiscordColor YOUTUBE_COLOR = new DiscordColor("#FF0000");
 
         [
             Command("play"),
@@ -32,7 +32,10 @@ namespace KrisMecn.Commands
         ]
         public async Task Play(CommandContext ctx, Uri url)
         {
-            await ctx.PlayFromURL(url).ConfigureAwait(false);
+            var playbackInfo = ctx.GeneratePlaybackInfoEmbed(url)
+                .WithColor(new DiscordColor("#FFFFFF"));
+
+            await ctx.PlayFromURL(url, playbackInfo).ConfigureAwait(false);
         }
 
         [
@@ -43,8 +46,10 @@ namespace KrisMecn.Commands
         public async Task PlayNightcore(CommandContext ctx, Uri url)
         {
             var converter = ctx.Client.GetConverter().IncreaseTempo(1.25);
+            var playbackInfo = ctx.GeneratePlaybackInfoEmbed(url)
+                .WithColor(new DiscordColor("#6339B4"));
 
-            await ctx.PlayFromURL(url, converter).ConfigureAwait(false);
+            await ctx.PlayFromURL(url, playbackInfo, converter).ConfigureAwait(false);
         }
 
         [
@@ -55,8 +60,10 @@ namespace KrisMecn.Commands
         public async Task PlayVaporwave(CommandContext ctx, Uri url)
         {
             var converter = ctx.Client.GetConverter().IncreaseTempo(0.65);
+            var playbackInfo = ctx.GeneratePlaybackInfoEmbed(url)
+                .WithColor(new DiscordColor("#B5FEFE"));
 
-            await ctx.PlayFromURL(url, converter).ConfigureAwait(false);
+            await ctx.PlayFromURL(url, playbackInfo, converter).ConfigureAwait(false);
         }
 
         [
@@ -66,29 +73,34 @@ namespace KrisMecn.Commands
         ]
         public async Task PlayYoutube(CommandContext ctx, [RemainingText] string urlOrQuery)
         {
-            Uri youtubeUri;
-
+            // check if provided string is a youtube uri. If it is, play it.
             if (
-                Uri.TryCreate(urlOrQuery, UriKind.Absolute, out youtubeUri) &&
+                Uri.TryCreate(urlOrQuery, UriKind.Absolute, out Uri youtubeUri) &&
                 youtubeUri.IsHttp() &&
                 ALLOWED_YOUTUBE_HOSTS.Contains(youtubeUri.Host)
             )
             {
-                await ctx.PlayFromURL(youtubeUri).ConfigureAwait(false);
+                // generate playback info
+                var pi = ctx.GeneratePlaybackInfoEmbed(youtubeUri)
+                    .WithColor(YOUTUBE_COLOR);
+
+                await ctx.PlayFromURL(youtubeUri, pi).ConfigureAwait(false);
                 return;
             }
 
+            // fallback to youtube search
             var emoji = ctx.Client.GetEmojis();
             var youtubeApi = ctx.Client.GetYoutubeAPI();
 
             var searchRes = await youtubeApi.Search(urlOrQuery);
             var searchResNum = searchRes.Count;
 
+            // generate visual message for the user
             var embed = new DiscordEmbedBuilder()
                 .WithTitle($"Search results for: `{urlOrQuery}`")
+                .WithUrl($"https://www.youtube.com/results?search_query={Uri.EscapeUriString(urlOrQuery)}")
                 .WithAuthorFooter(ctx.Member, "Requested by: ")
-                .WithColor(new DiscordColor("#FF0000"))
-                .WithUrl($"https://www.youtube.com/results?search_query={Uri.EscapeUriString(urlOrQuery)}");
+                .WithColor(YOUTUBE_COLOR);
 
             if (searchResNum > 0)
             {
@@ -105,9 +117,11 @@ namespace KrisMecn.Commands
                 embed.WithDescription("***Nothing***");
             }
 
+            // send message to channel
             var resultMessage = await ctx.RespondAsync(embed: embed);
             var emojis = emoji.PollNumberEmojis(searchResNum);
 
+            // wait for the user to select which video he wants
             int selectedVid = await resultMessage.PollUserAsync(ctx.Member, emojis.ToArray(), 30);
 
             // delete poll message
@@ -116,10 +130,30 @@ namespace KrisMecn.Commands
             // play selected video (if anything was selected)
             if (selectedVid < 0 || selectedVid >= searchResNum) return;
 
-            var videoId = searchRes[selectedVid].Id.VideoId;
+            // prepare everything
+            var video = searchRes[selectedVid];
+            var videoId = video.Id.VideoId;
+            var videoTitle = video.Snippet.Title;
+            var channelTitle = video.Snippet.ChannelTitle;
+            var thumbnails = video.Snippet.Thumbnails;
+            var targetThumbnail = 
+                thumbnails.High ??
+                thumbnails.Medium ??
+                thumbnails.Standard ??
+                thumbnails.Maxres ??
+                thumbnails.Default__
+            ;
+            var thumbnailUrl = targetThumbnail.Url;
             var videoUri = new Uri($"https://youtu.be/{videoId}");
+            var playbackInfo = ctx.GeneratePlaybackInfoEmbed(videoUri)
+                .WithTitle($"{ctx.Prefix}{ctx.Command.QualifiedName} {ctx.RawArgumentString}")
+                .WithThumbnailUrl(thumbnailUrl ?? "")
+                .AddField("Title", videoTitle, true)
+                .AddField("Channel Name", channelTitle, true)
+                .WithColor(YOUTUBE_COLOR);
 
-            await ctx.PlayFromURL(videoUri);
+            // play the video
+            await ctx.PlayFromURL(videoUri, playbackInfo);
         }
 
         [
@@ -151,6 +185,18 @@ namespace KrisMecn.Commands
             if (voiceCon == null) return;
 
             voiceCon.GetTransmitStream().VolumeModifier = outVolume;
+        }
+
+        [
+            Command("currentSong"),
+            Aliases("cs", "playing"),
+            Description("Sends you info about the audio that's currently playing")
+        ]
+        public async Task CurrentSong(CommandContext ctx)
+        {
+            var playbackInfo = await ctx.GetCurrentPlaybackInfo() ?? new DiscordEmbedBuilder().WithTitle("Nothing.");
+
+            await ctx.ReplyToDM("__**Current song**__", embed: playbackInfo).ConfigureAwait(false);
         }
 
         [
