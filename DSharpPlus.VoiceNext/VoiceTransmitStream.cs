@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using DSharpPlus.Entities;
 using DSharpPlus.VoiceNext.Codec;
 using DSharpPlus.VoiceNext.Entities;
 
@@ -50,7 +51,15 @@ namespace DSharpPlus.VoiceNext
         public int SampleDuration
             => this.PcmBufferDuration;
 
+        /// <summary>
+        /// Gets whether the stream is actively processing something
+        /// </summary>
         public bool IsPlaying { get; private set; } = false;
+
+        /// <summary>
+        /// Gets embed info for the current playback (if any)
+        /// </summary>
+        public DiscordEmbed CurrentPlaybackInfo = null;
 
         /// <summary>
         /// Gets or sets the volume modifier for this stream. Changing this will alter the volume of the output. 1.0 is 100%.
@@ -233,11 +242,21 @@ namespace DSharpPlus.VoiceNext
             }
         }
 
-        public Task ReadFrom(Stream stream)
+        /// <summary>
+        /// Reads audio data from the provided stream
+        /// </summary>
+        /// <param name="stream">PCM audio stream</param>
+        /// <param name="playbackInfo">Optional info about the stream</param>
+        /// <returns></returns>
+        public async Task ReadFrom(Stream stream, DiscordEmbed playbackInfo = null)
         {
             IsPlaying = true;
+            CurrentPlaybackInfo = playbackInfo;
 
-            return stream.CopyToAsync(this, 81920, StreamCloseTokenSource.Token);
+            await stream.CopyToAsync(this, 81920, StreamCloseTokenSource.Token).ConfigureAwait(false);
+
+            IsPlaying = false;
+            CurrentPlaybackInfo = null;
         }
 
         /// <summary>
@@ -262,6 +281,7 @@ namespace DSharpPlus.VoiceNext
             StreamCloseTokenSource = new CancellationTokenSource();
             
             IsPlaying = false;
+            CurrentPlaybackInfo = null;
         }
 
         /// <summary>

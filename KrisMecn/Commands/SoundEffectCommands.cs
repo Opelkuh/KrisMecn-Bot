@@ -3,6 +3,7 @@ using DSharpPlus.CommandsNext.Entities;
 using System;
 using System.Threading.Tasks;
 using KrisMecn.Helpers.Extensions;
+using DSharpPlus.Entities;
 
 namespace KrisMecn.Commands
 {
@@ -26,7 +27,12 @@ namespace KrisMecn.Commands
                     await ctx.Message.DeleteAsync();
                 } catch(Exception) { }
 
-                await ctx.PlayFromFile(filePath).ConfigureAwait(false);
+                var playbackInfo = ctx.GeneratePlaybackInfoEmbed()
+                    .WithDescription("Built-in sound file")
+                    .WithThumbnailUrl(ctx.Client.CurrentUser.AvatarUrl)
+                    .WithColor(new DiscordColor("#EBA991"));
+
+                await ctx.PlayFromFile(filePath, playbackInfo).ConfigureAwait(false);
             };
         }
     }
