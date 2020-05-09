@@ -147,13 +147,6 @@ namespace KrisMecn
 
         private async Task Commands_CommandErrored(CommandErrorEventArgs e)
         {
-            try
-            {
-                // delete the users command
-                await e.Context.Message.DeleteAsync();
-            }
-            catch { }
-
             // log error
             Logger.Error(
                 $"{e.Context.User.Username} tried executing '{e.Command?.QualifiedName ?? "<unknown command>"}' but it errored: {e.Exception.GetType()}: {e.Exception.Message ?? "<no message>"}"
@@ -165,9 +158,9 @@ namespace KrisMecn
                 if (e.Context.Member == null || ex.FailedChecks.Count <= 0) return;
 
                 var sb = new StringBuilder();
-                foreach(var check in ex.FailedChecks)
+                foreach (var check in ex.FailedChecks)
                 {
-                    switch(check)
+                    switch (check)
                     {
                         case RequireNsfwAttribute _:
                             sb.Append("Channel isn't set as NSFW.\n");
@@ -178,8 +171,16 @@ namespace KrisMecn
                     }
                 }
 
-                if(sb.Length > 0)
+                if (sb.Length > 0)
+                {
                     await e.Context.Member.SendMessageAsync(sb.ToString());
+                    try
+                    {
+                        // delete the users command
+                        await e.Context.Message.DeleteAsync();
+                    }
+                    catch { }
+                }
             }
         }
 
@@ -192,7 +193,7 @@ namespace KrisMecn
 
             // start connection
             await _client.ConnectAsync(activity, Config.Activity.Status);
-
+            
             await Task.Delay(-1);
         }
     }
