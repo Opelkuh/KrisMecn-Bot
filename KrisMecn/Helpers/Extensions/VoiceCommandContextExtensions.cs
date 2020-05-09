@@ -12,7 +12,7 @@ namespace KrisMecn.Helpers.Extensions
 {
     static class VoiceCommandContextExtensions
     {
-        public async static Task PlayFromURL(this CommandContext ctx, Uri uri, Converter converter = null)
+        public async static Task PlayFromURL(this CommandContext ctx, Uri uri, DiscordEmbed playbackInfo = null, Converter converter = null)
         {
             if (!uri.IsHttp())
             {
@@ -26,7 +26,7 @@ namespace KrisMecn.Helpers.Extensions
 
             // prepare downloader
             var downloader = ctx.Client.GetDownloader();
-            
+
             // start all processes
             try
             {
@@ -36,7 +36,7 @@ namespace KrisMecn.Helpers.Extensions
 
                 // pass downloaded data to converter and play the converted output
                 var downloadStreamTask = downloadStream.CopyToAsync(converterStream.Input);
-                var playTask = ctx.PlayVoiceStream(converterStream.Output);
+                var playTask = ctx.PlayVoiceStream(converterStream.Output, playbackInfo);
 
                 // wait for one of the tasks to finish or fail
                 var anyTask = await Task.WhenAny(downloadStreamTask, playTask);
@@ -60,17 +60,17 @@ namespace KrisMecn.Helpers.Extensions
             }
         }
 
-        public async static Task PlayFromFile(this CommandContext ctx, string path)
+        public async static Task PlayFromFile(this CommandContext ctx, string path, DiscordEmbed playbackInfo = null)
         {
             using(var converter = ctx.Client.GetConverter(path).ToPCM())
             {
                 var converterStream = converter.Start();
 
-                await ctx.PlayVoiceStream(converterStream.Output);
+                await ctx.PlayVoiceStream(converterStream.Output, playbackInfo);
             }
         }
 
-        public async static Task PlayVoiceStream(this CommandContext ctx, Stream pcmStream)
+        public async static Task PlayVoiceStream(this CommandContext ctx, Stream pcmStream, DiscordEmbed playbackInfo = null)
         {
             var voiceConn = await ctx.GetVoiceConnection();
 
@@ -85,7 +85,14 @@ namespace KrisMecn.Helpers.Extensions
             // reset volume to 1
             voiceStream.VolumeModifier = 1;
 
-            await voiceStream.ReadFrom(pcmStream);
+            await voiceStream.ReadFrom(pcmStream, playbackInfo);
+        }
+
+        public async static Task<DiscordEmbed> GetCurrentPlaybackInfo(this CommandContext ctx)
+        {
+            var voiceConn = await ctx.GetVoiceConnection(true);
+
+            return voiceConn?.GetTransmitStream()?.CurrentPlaybackInfo;
         }
 
         public async static Task<VoiceNextConnection> GetVoiceConnection(this CommandContext ctx, bool onlyExisting = false)
@@ -146,6 +153,21 @@ namespace KrisMecn.Helpers.Extensions
             Logger.Info($"Disconnected from voice channel - {existingConn.Channel.Guild.Name} : {existingConn.Channel.Name}");
 
             return Task.CompletedTask;
+        }
+
+        public static DiscordEmbedBuilder GeneratePlaybackInfoEmbed(this CommandContext ctx, Uri url = null)
+        {
+            var embed = new DiscordEmbedBuilder()
+                .WithTitle($"{ctx.Prefix}{ctx.Command.QualifiedName}")
+                .WithAuthorFooter(ctx.Member, "Requested by: ")
+                .WithTimestamp(DateTime.Now);
+
+            if (url != null)
+            {
+                embed.WithDescription(url.AbsoluteUri);
+            }
+
+            return embed;
         }
 
         private static Task VoiceConnection_VoiceSocketErrored(SocketErrorEventArgs e)
