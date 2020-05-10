@@ -14,6 +14,9 @@
         /// Initializes this extension for given <see cref="DiscordClient"/> instance.
         /// </summary>
         /// <param name="client">Discord client to initialize for.</param>
-        protected internal abstract void Setup(DiscordClient client);
+        protected internal virtual void Setup(DiscordClient client)
+        {
+            Client = client;
+        }
     }
 }

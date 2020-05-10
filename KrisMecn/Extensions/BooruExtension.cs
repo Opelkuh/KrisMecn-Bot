@@ -17,14 +17,6 @@ namespace KrisMecn.Extensions
         private Safebooru _safebooru = new Safebooru();
         private SankakuComplex _sankakuComplex = new SankakuComplex();
 
-        public BooruExtension()
-        {
-        }
-
-        protected override void Setup(DiscordClient client)
-        {
-        }
-
         private ABooru GetClientFromSite(BooruSite site)
         {
             return site switch

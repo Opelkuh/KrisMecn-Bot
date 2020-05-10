@@ -12,6 +12,8 @@ namespace KrisMecn.Extensions
 
         protected override void Setup(DiscordClient client)
         {
+            base.Setup(client);
+
             Numbers = new DiscordEmoji[]
             {
                 DiscordEmoji.FromName(client, ":zero:"),

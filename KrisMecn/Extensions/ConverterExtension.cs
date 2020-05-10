@@ -26,10 +26,6 @@ namespace KrisMecn.Extensions
             return ret;
         }
 
-        protected override void Setup(DiscordClient client)
-        {
-        }
-
         private void Converter_ProcessErrorEvent(object sender, System.Diagnostics.DataReceivedEventArgs e)
         {
             Logger.Error("ffmpeg Error", e.Data);
