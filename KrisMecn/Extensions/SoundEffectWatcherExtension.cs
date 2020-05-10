@@ -48,7 +48,7 @@ namespace KrisMecn.Extensions
 
         protected override void Setup(DiscordClient client)
         {
-            Client = client;
+            base.Setup(client);
 
             // register all existring se files
             RegisterAllFilesFromPath(_sePath);

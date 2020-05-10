@@ -21,10 +21,6 @@ namespace KrisMecn.Extensions
             return ret;
         }
 
-        protected override void Setup(DiscordClient client)
-        {
-        }
-
         private void Downloader_ProcessErrorEvent(object sender, System.Diagnostics.DataReceivedEventArgs e)
         {
             Logger.Error("Youtube-DL Error", e.Data);
