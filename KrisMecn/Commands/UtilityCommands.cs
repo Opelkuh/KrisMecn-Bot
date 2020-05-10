@@ -69,15 +69,18 @@ namespace KrisMecn.Commands
                 if (cmd.IsHidden) continue;
                 
                 List<string> helpStrings = new List<string>();
-                foreach(var ol in cmd.Overloads)
+                var sb = new StringBuilder();
+
+                // add command overloads
+                for(int i = 0; i < cmd.Overloads.Count; i++)
                 {
-                    var sb = new StringBuilder();
+                    var ol = cmd.Overloads[i];
 
                     sb.Append("> **")
                       .Append(commandPrefix)
                       .Append(cmd.Name);
-                    
-                    foreach(var arg in ol.Arguments)
+
+                    foreach (var arg in ol.Arguments)
                     {
                         sb.Append(" <")
                           .Append(arg.Name);
@@ -89,29 +92,34 @@ namespace KrisMecn.Commands
 
                     sb.Append("**");
 
-                    if (!string.IsNullOrEmpty(cmd.Description))
-                    {
-                        sb.Append("\n*Description:* ") 
-                          .Append(cmd.Description);
-                    }
-
-                    if(cmd.Aliases.Count > 0)
-                    {
-                        sb.Append("\n*Aliases:* ");
-
-                        int lastIndex = cmd.Aliases.Count - 1;
-                        // append all aliases except the last one
-                        for (int i = 0; i < lastIndex; i++)
-                        {
-                            sb.Append(commandPrefix).Append(cmd.Aliases[i]).Append(", ");
-                        }
-
-                        // append last
-                        sb.Append(commandPrefix).Append(cmd.Aliases[lastIndex]);
-                    }
-
-                    helpStrings.Add(sb.ToString());
+                    // add newline only if it's the last cycle
+                    if (i < cmd.Overloads.Count - 1) sb.Append("\n");
                 }
+
+                // add description
+                if (!string.IsNullOrEmpty(cmd.Description))
+                {
+                    sb.Append("\n*Description:* ")
+                      .Append(cmd.Description);
+                }
+
+                // add alisases
+                if (cmd.Aliases.Count > 0)
+                {
+                    sb.Append("\n*Aliases:* ");
+
+                    int lastIndex = cmd.Aliases.Count - 1;
+                    // append all aliases except the last one
+                    for (int i = 0; i < lastIndex; i++)
+                    {
+                        sb.Append(commandPrefix).Append(cmd.Aliases[i]).Append(", ");
+                    }
+
+                    // append last
+                    sb.Append(commandPrefix).Append(cmd.Aliases[lastIndex]);
+                }
+
+                helpStrings.Add(sb.ToString());
 
                 string moduleName = cmd.Module.ModuleType.Name;
                 if (moduleCmdHelp.ContainsKey(moduleName)) moduleCmdHelp[moduleName].AddRange(helpStrings);

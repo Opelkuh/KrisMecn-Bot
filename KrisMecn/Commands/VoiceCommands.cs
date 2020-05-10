@@ -69,36 +69,40 @@ namespace KrisMecn.Commands
         [
             Command("yt"),
             Aliases("youtube"),
-            Description("Searches YouTube with the provided query and lets you select the video that you want to play.")
         ]
-        public async Task PlayYoutube(CommandContext ctx, [RemainingText] string urlOrQuery)
+        public async Task PlayYoutube(CommandContext ctx, Uri videoUrl)
         {
-            // check if provided string is a youtube uri. If it is, play it.
-            if (
-                Uri.TryCreate(urlOrQuery, UriKind.Absolute, out Uri youtubeUri) &&
-                youtubeUri.IsHttp() &&
-                ALLOWED_YOUTUBE_HOSTS.Contains(youtubeUri.Host)
-            )
+            // check if provided string is a youtube uri. If it isn't, fallback to search
+            if (!videoUrl.IsHttp() || !ALLOWED_YOUTUBE_HOSTS.Contains(videoUrl.Host))
             {
-                // generate playback info
-                var pi = ctx.GeneratePlaybackInfoEmbed(youtubeUri)
-                    .WithColor(YOUTUBE_COLOR);
-
-                await ctx.PlayFromURL(youtubeUri, pi).ConfigureAwait(false);
+                await PlayYoutube(ctx, videoUrl.AbsoluteUri).ConfigureAwait(false);
                 return;
             }
 
+            // generate playback info
+            var pi = ctx.GeneratePlaybackInfoEmbed(videoUrl)
+                .WithColor(YOUTUBE_COLOR);
+
+            await ctx.PlayFromURL(videoUrl, pi).ConfigureAwait(false);
+        }
+
+        [
+            Command("yt"),
+            Description("Searches YouTube with the provided query and lets you select the video that you want to play."),
+        ]
+        public async Task PlayYoutube(CommandContext ctx, [RemainingText] string searchQuery)
+        {
             // fallback to youtube search
             var emoji = ctx.Client.GetEmojis();
             var youtubeApi = ctx.Client.GetYoutubeAPI();
 
-            var searchRes = await youtubeApi.Search(urlOrQuery);
+            var searchRes = await youtubeApi.Search(searchQuery);
             var searchResNum = searchRes.Count;
 
             // generate visual message for the user
             var embed = new DiscordEmbedBuilder()
-                .WithTitle($"Search results for: `{urlOrQuery}`")
-                .WithUrl($"https://www.youtube.com/results?search_query={Uri.EscapeUriString(urlOrQuery)}")
+                .WithTitle($"Search results for: `{searchQuery}`")
+                .WithUrl($"https://www.youtube.com/results?search_query={Uri.EscapeUriString(searchQuery)}")
                 .WithAuthorFooter(ctx.Member, "Requested by: ")
                 .WithColor(YOUTUBE_COLOR);
 
