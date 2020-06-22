@@ -35,7 +35,7 @@ namespace KrisMecn.Helpers.Extensions
                 var converterStream = converter.Start();
 
                 // pass downloaded data to converter and play the converted output
-                var downloadStreamTask = downloadStream.CopyToAsync(converterStream.Input);
+                var downloadStreamTask = downloadStream.CopyToAsync(converterStream.Input, 4096000 /* ~4mb */);
                 var playTask = ctx.PlayVoiceStream(converterStream.Output, playbackInfo);
 
                 // wait for one of the tasks to finish or fail
