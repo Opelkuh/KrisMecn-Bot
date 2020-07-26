@@ -22,6 +22,9 @@ namespace KrisMecn.Entities
         [JsonProperty("helpPrefix")]
         public string HelpPrefix = "";
 
+        [JsonProperty("inviteLink")]
+        public string InviteLink = "";
+
         public static Config LoadFromFile(string path)
         {
             using (var sr = new StreamReader(path))
