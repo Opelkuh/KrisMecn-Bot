@@ -27,7 +27,7 @@ namespace KrisMecn.Commands
 
         [
             Command("play"),
-            Aliases("p", "pl"),
+            Aliases("p", "pl", "sc", "soundcloud"),
             Description("Plays audio from the provided link in your current voice channel. Supports all sites that are supported by `youtube-dl`")
         ]
         public async Task Play(CommandContext ctx, Uri url)
@@ -40,7 +40,7 @@ namespace KrisMecn.Commands
 
         [
             Command("nightcore"),
-            Aliases("nc", "playnightcore"),
+            Aliases("nc", "plaync", "playnightcore"),
             Description(@"Plays """"""nightcore"""""" from the provided link in your current voice channel")
         ]
         public async Task PlayNightcore(CommandContext ctx, Uri url)
@@ -54,7 +54,7 @@ namespace KrisMecn.Commands
 
         [
             Command("vaporwave"),
-            Aliases("vw", "playvaporwave"),
+            Aliases("vw", "playvw", "playvaporwave"),
             Description(@"Plays """"""vaporwave"""""" from the provided link in your current voice channel")
         ]
         public async Task PlayVaporwave(CommandContext ctx, Uri url)
