@@ -73,8 +73,9 @@ namespace KrisMecn.Commands
             var eb = new DiscordEmbedBuilder()
                 .WithTitle($"Image from {siteName} with tags `{tags}`: ");
 
-            // add color
+            // add color and author info
             if (color.HasValue) eb.WithColor(color.Value);
+            if (ctx.Member != null) eb.WithAuthorFooter(ctx.Member, "Requested by: "); // `Member` is null in DM channels
 
             // fetch image
             var response = await booru.GetRandomImage(site, tags);
@@ -96,7 +97,6 @@ namespace KrisMecn.Commands
                 .WithImageUrl(img.fileUrl.AbsoluteUri);
 
             // add optional fields
-            if (ctx.Member != null) eb.WithAuthorFooter(ctx.Member, "Requested by: "); // `Member` is null in DM channels
             if (img.score.HasValue) eb.AddField("Likes", img.score.Value.ToString(), true);
             if (img.creation.HasValue) eb.AddField("Upload date (D.M.Y)", img.creation.Value.ToString("dd.MM.yyyy"), true);
 
