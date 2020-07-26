@@ -163,7 +163,7 @@ namespace KrisMecn
                     switch (check)
                     {
                         case RequireNsfwAttribute _:
-                            sb.Append("Channel isn't set as NSFW.\n");
+                            sb.Append($"Channel #{ex.Context.Channel.Name} isn't set as NSFW.\n");
                             break;
                         case RequireVoiceChannelAttribute _:
                             sb.Append("You have to be connected to a voice channel.\n");
