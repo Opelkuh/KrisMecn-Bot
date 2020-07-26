@@ -59,6 +59,18 @@ namespace KrisMecn.Commands
             }
         }
 
+        [
+            Command("invite"),
+            Aliases("inv", "inviteLink"),
+            Description("Sends you the bot's invite link")
+        ]
+        public async Task Invite(CommandContext ctx)
+        {
+            string inviteLink = ctx.Client.GetBotContext().BotInstance.Config.InviteLink;
+
+            await ctx.ReplyToDM($"Invite link: {inviteLink}");
+        }
+
         private List<string> GenerateHelp(string commandPrefix, IEnumerable<Command> commands, string helpPrefix = "")
         {
             var moduleCmdHelp = new Dictionary<string, List<string>>();
