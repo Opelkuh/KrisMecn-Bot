@@ -45,7 +45,7 @@ namespace KrisMecn.Commands
 
         [
             Command("sankakucomplex"),
-            Aliases("sc", "sankaku"),
+            Aliases("sankaku"),
             Description("Gets a random image from beta.sankakucomplex.com with the specified tags"),
             RequireNsfw()
         ]
