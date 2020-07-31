@@ -409,8 +409,8 @@ namespace DSharpPlus.VoiceNext
                     var delay = (long)(synchronizerDelay * tickResolution);
                     var targetTime = (long)(now + synchronizerDelay);
 
-                    if(delay > 50000 /* 5ms */) {
-                        await Task.Delay(TimeSpan.FromTicks(delay - 50000)).ConfigureAwait(false);
+                    if(delay > 100000 /* 10ms */) {
+                        await Task.Delay(TimeSpan.FromTicks(delay - 100000)).ConfigureAwait(false);
                     }
 
                     spinWait.Reset();
@@ -645,7 +645,7 @@ namespace DSharpPlus.VoiceNext
         /// </summary>
         /// <param name="sampleDuration">Duration, in ms, to use for audio packets.</param>
         /// <returns>Transmit stream.</returns>
-        public VoiceTransmitStream GetTransmitStream(int sampleDuration = 20)
+        public VoiceTransmitStream GetTransmitStream(int sampleDuration = 60)
         {
             if (!AudioFormat.AllowedSampleDurations.Contains(sampleDuration))
                 throw new ArgumentOutOfRangeException(nameof(sampleDuration), "Invalid PCM sample duration specified.");
