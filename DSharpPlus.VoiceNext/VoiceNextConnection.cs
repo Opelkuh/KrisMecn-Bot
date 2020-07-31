@@ -370,6 +370,7 @@ namespace DSharpPlus.VoiceNext
             var synchronizerTicks = (double)Stopwatch.GetTimestamp();
             var synchronizerResolution = (Stopwatch.Frequency * 0.005);
             var tickResolution = 10_000_000.0 / Stopwatch.Frequency;
+            var spinWait = new SpinWait();
             this.Discord.DebugLogger.LogMessage(LogLevel.Debug, "VoiceNext", $"Timer accuracy: {Stopwatch.Frequency.ToString("#,##0", CultureInfo.InvariantCulture)}/{synchronizerResolution.ToString(CultureInfo.InvariantCulture)} (high resolution? {Stopwatch.IsHighResolution})", DateTime.Now);
 
             while (!token.IsCancellationRequested)
@@ -401,9 +402,26 @@ namespace DSharpPlus.VoiceNext
                 //   DateTime.Now
 
                 var durationModifier = hasPacket ? packet.MillisecondDuration / 5 : 4;
-                var cts = Math.Max(Stopwatch.GetTimestamp() - synchronizerTicks, 0);
-                if (cts < synchronizerResolution * durationModifier)
-                    await Task.Delay(TimeSpan.FromTicks((long)(((synchronizerResolution * durationModifier) - cts) * tickResolution))).ConfigureAwait(false);
+                var now = Stopwatch.GetTimestamp();
+                var cts = Math.Max(now - synchronizerTicks, 0);
+                if (cts < synchronizerResolution * durationModifier) {
+                    var synchronizerDelay = (synchronizerResolution * durationModifier) - cts;
+                    var delay = (long)(synchronizerDelay * tickResolution);
+                    var targetTime = (long)(now + synchronizerDelay);
+
+                    if(delay > 100000 /* 10ms */) {
+                        await Task.Delay(TimeSpan.FromTicks(delay - 100000)).ConfigureAwait(false);
+                    }
+
+                    spinWait.Reset();
+                    while(Stopwatch.GetTimestamp() < targetTime) {
+                        spinWait.SpinOnce();
+                    }
+
+                    var jitter = (long)((Stopwatch.GetTimestamp() - targetTime) * tickResolution);
+                    if(jitter > 20000) 
+                        Console.WriteLine(jitter);
+                }
 
                 synchronizerTicks += synchronizerResolution * durationModifier;
 
@@ -627,7 +645,7 @@ namespace DSharpPlus.VoiceNext
         /// </summary>
         /// <param name="sampleDuration">Duration, in ms, to use for audio packets.</param>
         /// <returns>Transmit stream.</returns>
-        public VoiceTransmitStream GetTransmitStream(int sampleDuration = 20)
+        public VoiceTransmitStream GetTransmitStream(int sampleDuration = 60)
         {
             if (!AudioFormat.AllowedSampleDurations.Contains(sampleDuration))
                 throw new ArgumentOutOfRangeException(nameof(sampleDuration), "Invalid PCM sample duration specified.");
