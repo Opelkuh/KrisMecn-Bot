@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.IO;
+using System.Text.Json.Serialization;
 
 namespace KrisMecn.Entities
 {
@@ -44,15 +45,18 @@ namespace KrisMecn.Entities
 
     class Activity
     {
-        [JsonConverter(typeof(StringEnumConverter))]
+        [Newtonsoft.Json.JsonConverter(typeof(StringEnumConverter))]
         [JsonProperty("status")]
         public UserStatus Status = UserStatus.Online;
 
-        [JsonConverter(typeof(StringEnumConverter))]
+        [Newtonsoft.Json.JsonConverter(typeof(StringEnumConverter))]
         [JsonProperty("type")]
         public ActivityType Type = ActivityType.Custom;
 
         [JsonProperty("text")]
         public string Text = "";
+
+        [JsonPropertyName("prefix")]
+        public string Prdel {get; set;}
     }
 }

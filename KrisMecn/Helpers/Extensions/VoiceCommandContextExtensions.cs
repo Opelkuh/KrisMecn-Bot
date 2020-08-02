@@ -159,7 +159,7 @@ namespace KrisMecn.Helpers.Extensions
         {
             var embed = new DiscordEmbedBuilder()
                 .WithTitle($"{ctx.Prefix}{ctx.Command.QualifiedName}")
-                .WithAuthorFooter(ctx.Member, "Requested by: ")
+                .WithAuthorFooter(ctx.Member)
                 .WithTimestamp(DateTime.Now);
 
             if (url != null)
