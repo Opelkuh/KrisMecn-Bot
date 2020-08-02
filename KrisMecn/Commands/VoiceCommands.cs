@@ -103,7 +103,7 @@ namespace KrisMecn.Commands
             var embed = new DiscordEmbedBuilder()
                 .WithTitle($"Search results for: `{searchQuery}`")
                 .WithUrl($"https://www.youtube.com/results?search_query={Uri.EscapeUriString(searchQuery)}")
-                .WithAuthorFooter(ctx.Member, "Requested by: ")
+                .WithAuthorFooter(ctx.Member)
                 .WithColor(YOUTUBE_COLOR);
 
             if (searchResNum > 0)
