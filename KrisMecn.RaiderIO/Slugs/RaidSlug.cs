@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace KrisMecn.RaiderIO.Slugs
 {
     public class RaidSlug
@@ -17,5 +19,19 @@ namespace KrisMecn.RaiderIO.Slugs
         public const string TheNigthold = "the-nighthold";
         public const string TrialOfValor = "trial-of-valor";
         public const string TheEmeraldNightmare = "the-emerald-nightmare";
+
+        public static Dictionary<string, string> DisplayNames = new Dictionary<string, string>()
+        {
+            { NyalothaTheWakingCity, "Ny'alotha, The Waking City" },
+            { TheEternalPalace, "The Eternal Palace" },
+            { CrucibleOfStorms, "Crucible of Storms" },
+            { BattleOfDazaralor, "Battle of Dazar'alor" },
+            { Uldir, "Uldir" },
+            { AntorusTheBurningThrone, "Antorus, the Burning Throne" },
+            { TombOfSargeras, "Tomb of Sargeras" },
+            { TheNigthold, "The Nighthold" },
+            { TrialOfValor, "Trial of Valor" },
+            { TheEmeraldNightmare, "The Emerald Nightmare" },
+        };
     }
 }
