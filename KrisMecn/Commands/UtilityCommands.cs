@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Reflection;
+using KrisMecn.Attributes;
 using KrisMecn.Helpers.Extensions;
 
 namespace KrisMecn.Commands
@@ -28,7 +30,7 @@ namespace KrisMecn.Commands
         public async Task Uptime(CommandContext ctx)
         {
             var startTimes = ctx.Client.GetBotContext().BotInstance.StartTimes;
-            
+
             // create time strings
             var startTimeStr = (DateTime.Now - startTimes.BotStart).ToString(UPTIME_TIMESTAMP_FORMAT);
             var socketStartTimeStr = (DateTime.Now - startTimes.SocketStart).ToString(UPTIME_TIMESTAMP_FORMAT);
@@ -53,7 +55,7 @@ namespace KrisMecn.Commands
 
             // send help in parts
             // this is to overcome the 2000 character limit
-            foreach(var helpPart in _helpCache)
+            foreach (var helpPart in _helpCache)
             {
                 await ctx.ReplyToDM(helpPart);
             }
@@ -75,21 +77,34 @@ namespace KrisMecn.Commands
         {
             var moduleCmdHelp = new Dictionary<string, List<string>>();
 
-            foreach(var cmd in commands.Distinct())
-            {
+            var targetCommands = commands.Distinct().ToList();
+            for(int x = 0; x < targetCommands.Count; x++) {
+                var cmd = targetCommands[x];
+
                 // ignore hidden commands
                 if (cmd.IsHidden) continue;
-                
+
+                // convert command groups into individual commands
+                if (cmd is CommandGroup)
+                {
+                    var cmdGroup = cmd as CommandGroup;
+                    targetCommands.AddRange(cmdGroup.Children);
+                    continue;
+                }
+
                 List<string> helpStrings = new List<string>();
                 var sb = new StringBuilder();
 
+                var commandGroupPrefix = GetCommandGroupPrefix(cmd);
+
                 // add command overloads
-                for(int i = 0; i < cmd.Overloads.Count; i++)
+                for (int i = 0; i < cmd.Overloads.Count; i++)
                 {
                     var ol = cmd.Overloads[i];
 
                     sb.Append("> **")
                       .Append(commandPrefix)
+                      .Append(commandGroupPrefix)
                       .Append(cmd.Name);
 
                     foreach (var arg in ol.Arguments)
@@ -124,16 +139,24 @@ namespace KrisMecn.Commands
                     // append all aliases except the last one
                     for (int i = 0; i < lastIndex; i++)
                     {
-                        sb.Append(commandPrefix).Append(cmd.Aliases[i]).Append(", ");
+                        sb
+                          .Append(commandPrefix)
+                          .Append(commandGroupPrefix)
+                          .Append(cmd.Aliases[i])
+                          .Append(", ");
                     }
 
                     // append last
-                    sb.Append(commandPrefix).Append(cmd.Aliases[lastIndex]);
+                    sb.Append(commandPrefix).Append(commandGroupPrefix).Append(cmd.Aliases[lastIndex]);
                 }
 
                 helpStrings.Add(sb.ToString());
 
-                string moduleName = cmd.Module.ModuleType.Name;
+                var moduleType = cmd.Module.ModuleType;
+
+                var displayNameAttribute = moduleType.GetTypeInfo().GetCustomAttribute<ModuleDisplayNameAttribute>();
+                string moduleName = displayNameAttribute?.DisplayName ?? moduleType.Name;
+
                 if (moduleCmdHelp.ContainsKey(moduleName)) moduleCmdHelp[moduleName].AddRange(helpStrings);
                 else moduleCmdHelp.Add(moduleName, helpStrings);
             }
@@ -146,14 +169,14 @@ namespace KrisMecn.Commands
             // add prefix
             hb.Append(helpPrefix);
 
-            foreach(var moduleName in moduleCmdHelp.Keys)
+            foreach (var moduleName in moduleCmdHelp.Keys)
             {
                 var readableName = Regex.Replace(moduleName, "((?<!^)[A-Z])", " $1").ToUpper();
 
                 hb.AppendFormat("__**{0}**__\n\n", readableName);
-                foreach(var cmdHelp in moduleCmdHelp[moduleName])
+                foreach (var cmdHelp in moduleCmdHelp[moduleName])
                 {
-                    if(hb.Length + cmdHelp.Length + 2 /* newline size */ > hb.MaxCapacity)
+                    if (hb.Length + cmdHelp.Length + 2 /* newline size */ > hb.MaxCapacity)
                     {
                         // finish string builder and start creating a new part
                         ret.Add(hb.ToString());
@@ -170,6 +193,23 @@ namespace KrisMecn.Commands
             ret.Add(hb.ToString());
 
             return ret;
+        }
+
+        private string GetCommandGroupPrefix(Command command)
+        {
+            if (command.Parent == null) return "";
+
+            var parent = command.Parent;
+            var parts = new List<string>();
+            while (parent != null)
+            {
+                parts.Add(parent.Name);
+                parent = parent.Parent;
+            }
+
+            parts.Reverse();
+
+            return string.Join(" ", parts) + " ";
         }
     }
 }

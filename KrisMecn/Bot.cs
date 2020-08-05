@@ -9,6 +9,7 @@ using DSharpPlus.VoiceNext;
 using KrisMecn.Entities;
 using KrisMecn.Extensions;
 using KrisMecn.Attributes;
+using KrisMecn.Converters;
 using System;
 using System.IO;
 using System.Reflection;
@@ -79,6 +80,9 @@ namespace KrisMecn
             _client.AddExtension(new ConverterExtension());
             _client.AddExtension(new SoundEffectWatcherExtension("./soundEffects"));
             _client.AddExtension(new YoutubeAPIExtension(Config.GoogleApiKey));
+
+            // setup custom converters
+            _commands.RegisterConverter(new RegionConverter());
 
             // hook events
             _client.Ready += Client_Ready;
