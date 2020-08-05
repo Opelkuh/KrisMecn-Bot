@@ -55,8 +55,5 @@ namespace KrisMecn.Entities
 
         [JsonProperty("text")]
         public string Text = "";
-
-        [JsonPropertyName("prefix")]
-        public string Prdel {get; set;}
     }
 }
