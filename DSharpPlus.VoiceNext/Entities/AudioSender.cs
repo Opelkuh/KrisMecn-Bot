@@ -1,6 +1,6 @@
-﻿using System;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
 using DSharpPlus.VoiceNext.Codec;
+using System;
 
 namespace DSharpPlus.VoiceNext.Entities
 {

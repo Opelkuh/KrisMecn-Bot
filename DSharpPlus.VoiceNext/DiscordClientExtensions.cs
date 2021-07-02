@@ -1,9 +1,9 @@
-﻿using System;
+﻿using DSharpPlus.Entities;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using DSharpPlus.Entities;
 
 namespace DSharpPlus.VoiceNext
 {
@@ -14,7 +14,7 @@ namespace DSharpPlus.VoiceNext
         /// </summary>
         /// <param name="client">Discord client to create VoiceNext instance for.</param>
         /// <returns>VoiceNext client instance.</returns>
-        public static VoiceNextExtension UseVoiceNext(this DiscordClient client) 
+        public static VoiceNextExtension UseVoiceNext(this DiscordClient client)
             => UseVoiceNext(client, new VoiceNextConfiguration());
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace DSharpPlus.VoiceNext
         /// </summary>
         /// <param name="client">Discord client to get VoiceNext instance for.</param>
         /// <returns>VoiceNext client instance.</returns>
-        public static VoiceNextExtension GetVoiceNext(this DiscordClient client) 
+        public static VoiceNextExtension GetVoiceNext(this DiscordClient client)
             => client.GetExtension<VoiceNextExtension>();
 
         /// <summary>

@@ -1,12 +1,12 @@
-﻿using System;
-using System.IO;
-using System.Threading.Tasks;
+﻿using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
-using DSharpPlus.CommandsNext;
 using DSharpPlus.VoiceNext;
 using DSharpPlus.VoiceNext.EventArgs;
 using KrisMecn.Voice;
-using DSharpPlus.Entities;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace KrisMecn.Helpers.Extensions
 {
@@ -50,10 +50,12 @@ namespace KrisMecn.Helpers.Extensions
 
                 // wait for all tasks to finish
                 await Task.WhenAll(downloadStreamTask, playTask);
-            } catch(Exception e)
+            }
+            catch (Exception e)
             {
                 Logger.Error("PlayFromURL error", e);
-            } finally
+            }
+            finally
             {
                 downloader.Dispose();
                 converter.Dispose();
@@ -62,7 +64,7 @@ namespace KrisMecn.Helpers.Extensions
 
         public async static Task PlayFromFile(this CommandContext ctx, string path, DiscordEmbed playbackInfo = null)
         {
-            using(var converter = ctx.Client.GetConverter(path).ToPCM())
+            using (var converter = ctx.Client.GetConverter(path).ToPCM())
             {
                 var converterStream = converter.Start();
 
@@ -75,7 +77,7 @@ namespace KrisMecn.Helpers.Extensions
             var voiceConn = await ctx.GetVoiceConnection();
 
             // cancel the current playback if the connection is playing something
-            if(voiceConn.IsPlaying)
+            if (voiceConn.IsPlaying)
             {
                 voiceConn.StopPlayback();
             }
@@ -102,7 +104,7 @@ namespace KrisMecn.Helpers.Extensions
 
             // fetch voice library
             var vclient = ctx.Client.GetVoiceNext();
-            if(vclient == null)
+            if (vclient == null)
             {
                 throw new Exception("Failed to load voice module");
             }
@@ -170,24 +172,24 @@ namespace KrisMecn.Helpers.Extensions
             return embed;
         }
 
-        private static Task VoiceConnection_VoiceSocketErrored(SocketErrorEventArgs e)
+        private static Task VoiceConnection_VoiceSocketErrored(VoiceNextConnection sender, SocketErrorEventArgs e)
         {
             Logger.Error(e);
             return Task.CompletedTask;
         }
 
-        private static Task VoiceConnection_UserLeft(VoiceUserLeaveEventArgs e)
+        private static Task VoiceConnection_UserLeft(VoiceNextConnection conn, VoiceUserLeaveEventArgs e)
         {
             // ignore event if the channel isn't empty
-            if (!IsEmptyVoiceChannel(e.Connection.Channel, e.User)) return Task.CompletedTask;
+            if (!IsEmptyVoiceChannel(conn.Channel, e.User)) return Task.CompletedTask;
 
             Task.Run(async () =>
             {
                 await Task.Delay(TimeSpan.FromSeconds(30));
 
-                if (!IsEmptyVoiceChannel(e.Connection.Channel)) return;
+                if (!IsEmptyVoiceChannel(conn.Channel)) return;
 
-                e.Connection.Disconnect();
+                conn.Disconnect();
             });
 
             // don't wait for the delayed task
@@ -198,7 +200,7 @@ namespace KrisMecn.Helpers.Extensions
         {
             if (channel.Type != DSharpPlus.ChannelType.Voice) throw new Exception("IsEmptyChannel called with non-voice channel");
 
-            foreach(var user in channel.Users)
+            foreach (var user in channel.Users)
             {
                 // return false on first non-bot user
                 if (!user.IsBot && user.Id != ignoredUser?.Id) return false;

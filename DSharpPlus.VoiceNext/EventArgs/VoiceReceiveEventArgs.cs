@@ -1,6 +1,6 @@
-﻿using System;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using System;
 
 namespace DSharpPlus.VoiceNext.EventArgs
 {
@@ -41,7 +41,5 @@ namespace DSharpPlus.VoiceNext.EventArgs
         /// Gets the millisecond duration of the PCM audio sample.
         /// </summary>
         public int AudioDuration { get; internal set; }
-
-        internal VoiceReceiveEventArgs(DiscordClient client) : base(client) { }
     }
 }

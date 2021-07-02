@@ -1,11 +1,8 @@
-﻿using DSharpPlus;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using BooruSharp.Booru;
-using System.Threading.Tasks;
+﻿using BooruSharp.Booru;
 using BooruSharp.Search.Post;
-using BooruSharp.Search;
+using DSharpPlus;
+using System;
+using System.Threading.Tasks;
 
 namespace KrisMecn.Extensions
 {
@@ -50,7 +47,8 @@ namespace KrisMecn.Extensions
             try
             {
                 return await client.GetRandomImageAsync(tags);
-            } catch(Exception e)
+            }
+            catch (Exception e)
             {
                 Logger.Error(e);
 

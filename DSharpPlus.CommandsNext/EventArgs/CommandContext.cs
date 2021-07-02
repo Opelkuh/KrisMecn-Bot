@@ -1,10 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+// This file is part of the DSharpPlus project.
+//
+// Copyright (c) 2015 Mike Santiago
+// Copyright (c) 2016-2021 DSharpPlus Contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 using DSharpPlus.Entities;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace DSharpPlus.CommandsNext
 {
@@ -17,37 +38,37 @@ namespace DSharpPlus.CommandsNext
         /// Gets the client which received the message.
         /// </summary>
         public DiscordClient Client { get; internal set; }
-        
+
         /// <summary>
         /// Gets the message that triggered the execution.
         /// </summary>
         public DiscordMessage Message { get; internal set; }
-        
+
         /// <summary>
         /// Gets the channel in which the execution was triggered,
         /// </summary>
-        public DiscordChannel Channel 
+        public DiscordChannel Channel
             => this.Message.Channel;
 
         /// <summary>
         /// Gets the guild in which the execution was triggered. This property is null for commands sent over direct messages.
         /// </summary>
-        public DiscordGuild Guild 
+        public DiscordGuild Guild
             => this.Channel.Guild;
 
         /// <summary>
         /// Gets the user who triggered the execution.
         /// </summary>
-        public DiscordUser User 
+        public DiscordUser User
             => this.Message.Author;
 
         /// <summary>
         /// Gets the member who triggered the execution. This property is null for commands sent over direct messages.
         /// </summary>
-        public DiscordMember Member 
+        public DiscordMember Member
             => this._lazyAssMember.Value;
 
-        private Lazy<DiscordMember> _lazyAssMember;
+        private readonly Lazy<DiscordMember> _lazyAssMember;
 
         /// <summary>
         /// Gets the CommandsNext service instance that handled this command.
@@ -97,64 +118,48 @@ namespace DSharpPlus.CommandsNext
         /// Quickly respond to the message that triggered the command.
         /// </summary>
         /// <param name="content">Message to respond with.</param>
-        /// <param name="isTTS">Whether the message is to be spoken aloud.</param>
+        /// <returns></returns>
+        public Task<DiscordMessage> RespondAsync(string content)
+            => this.Message.RespondAsync(content);
+
+        /// <summary>
+        /// Quickly respond to the message that triggered the command.
+        /// </summary>
         /// <param name="embed">Embed to attach.</param>
         /// <returns></returns>
-        public Task<DiscordMessage> RespondAsync(string content = null, bool isTTS = false, DiscordEmbed embed = null) 
-            => this.Message.RespondAsync(content, isTTS, embed);
+        public Task<DiscordMessage> RespondAsync(DiscordEmbed embed)
+            => this.Message.RespondAsync(embed);
 
         /// <summary>
-        /// Quickly respond with a file to the message that triggered the command.
+        /// Quickly respond to the message that triggered the command.
         /// </summary>
-        /// <param name="fileName">Name of the file to send.</param>
-        /// <param name="fileData">Stream containing the data to attach as a file.</param>
         /// <param name="content">Message to respond with.</param>
-        /// <param name="isTTS">Whether the message is to be spoken aloud.</param>
-        /// <param name="embed">Embed to attach to the message.</param>
-        /// <returns>Message that was sent.</returns>
-        public Task<DiscordMessage> RespondWithFileAsync(string fileName, Stream fileData, string content = null, bool isTTS = false, DiscordEmbed embed = null) 
-            => this.Message.RespondWithFileAsync(fileName, fileData, content, isTTS, embed);
+        /// <param name="embed">Embed to attach.</param>
+        /// <returns></returns>
+        public Task<DiscordMessage> RespondAsync(string content, DiscordEmbed embed)
+            => this.Message.RespondAsync(content, embed);
 
         /// <summary>
-        /// Quickly respond with a file to the message that triggered the command.
+        /// Quickly respond to the message that triggered the command.
         /// </summary>
-        /// <param name="fileData">Stream containing the data to attach as a file.</param>
-        /// <param name="content">Message to respond with.</param>
-        /// <param name="isTTS">Whether the message is to be spoken aloud.</param>
-        /// <param name="embed">Embed to attach to the message.</param>
-        /// <returns>Message that was sent.</returns>
-        public Task<DiscordMessage> RespondWithFileAsync(FileStream fileData, string content = null, bool isTTS = false, DiscordEmbed embed = null) 
-            => this.Message.RespondWithFileAsync(fileData, content, isTTS, embed);
+        /// <param name="builder">The Discord Message builder.</param>
+        /// <returns></returns>
+        public Task<DiscordMessage> RespondAsync(DiscordMessageBuilder builder)
+            => this.Message.RespondAsync(builder);
 
         /// <summary>
-        /// Quickly respond with a file to the message that triggered the command.
+        /// Quickly respond to the message that triggered the command.
         /// </summary>
-        /// <param name="filePath">Path to the file to be attached to the message.</param>
-        /// <param name="content">Message to respond with.</param>
-        /// <param name="isTTS">Whether the message is to be spoken aloud.</param>
-        /// <param name="embed">Embed to attach to the message.</param>
-        /// <returns>Message that was sent.</returns>
-        public Task<DiscordMessage> RespondWithFileAsync(string filePath, string content = null, bool isTTS = false, DiscordEmbed embed = null)
-        {
-            return this.Message.RespondWithFileAsync(filePath, content, isTTS, embed);
-        }
-
-        /// <summary>
-        /// Quickly respond with multiple files to the message that triggered the command.
-        /// </summary>
-        /// <param name="content">Message to respond with.</param>
-        /// <param name="files">Files to send.</param>
-        /// <param name="isTTS">Whether the message is to be spoken aloud.</param>
-        /// <param name="embed">Embed to attach to the message.</param>
-        /// <returns>Message that was sent.</returns>
-        public Task<DiscordMessage> RespondWithFilesAsync(Dictionary<string, Stream> files, string content = null, bool isTTS = false, DiscordEmbed embed = null) 
-            => this.Message.RespondWithFilesAsync(files, content, isTTS, embed);
+        /// <param name="action">The Discord Message builder.</param>
+        /// <returns></returns>
+        public Task<DiscordMessage> RespondAsync(Action<DiscordMessageBuilder> action)
+            => this.Message.RespondAsync(action);
 
         /// <summary>
         /// Triggers typing in the channel containing the message that triggered the command.
         /// </summary>
         /// <returns></returns>
-        public Task TriggerTypingAsync() 
+        public Task TriggerTypingAsync()
             => this.Channel.TriggerTypingAsync();
 
         internal struct ServiceContext : IDisposable
@@ -170,10 +175,7 @@ namespace DSharpPlus.CommandsNext
                 this.IsInitialized = true;
             }
 
-            public void Dispose()
-            {
-                this.Scope?.Dispose();
-            }
+            public void Dispose() => this.Scope?.Dispose();
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using DSharpPlus.CommandsNext;
-using System;
-using System.Threading.Tasks;
 using KrisMecn.Helpers.Extensions;
+using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace KrisMecn.Commands
 {
@@ -13,7 +13,8 @@ namespace KrisMecn.Commands
             try
             {
                 ctx.Message.DeleteAsync();
-            } catch(Exception e)
+            }
+            catch (Exception e)
             {
                 Logger.Error(e);
             }

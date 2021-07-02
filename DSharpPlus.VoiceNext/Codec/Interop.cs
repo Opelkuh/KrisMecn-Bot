@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace DSharpPlus.VoiceNext.Codec
@@ -180,7 +179,7 @@ namespace DSharpPlus.VoiceNext.Codec
         public static unsafe int OpusDecode(IntPtr decoder, int frameSize, Span<byte> pcm)
         {
             var len = 0;
-            
+
             fixed (byte* pcmPtr = &pcm.GetPinnableReference())
                 len = _OpusDecode(decoder, null, 0, pcmPtr, frameSize, 1);
 
@@ -209,6 +208,6 @@ namespace DSharpPlus.VoiceNext.Codec
         {
             _OpusDecoderControl(decoder, OpusControl.GetLastPacketDuration, out sampleCount);
         }
-#endregion
+        #endregion
     }
 }

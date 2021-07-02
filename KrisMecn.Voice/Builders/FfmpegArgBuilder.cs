@@ -1,5 +1,5 @@
-﻿using System.Text;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Text;
 
 namespace KrisMecn.Voice.Builders
 {
@@ -52,7 +52,7 @@ namespace KrisMecn.Voice.Builders
         public string Build(string output)
         {
             // add all audio filters
-            if(_audioFilters.Count > 0)
+            if (_audioFilters.Count > 0)
             {
                 _sb.Append("-filter:a ");
 
@@ -61,7 +61,7 @@ namespace KrisMecn.Voice.Builders
                 {
                     _sb.AppendFormat("{0},", _audioFilters[i]);
                 }
-                
+
                 // append last without comma
                 _sb.AppendFormat("{0} ", _audioFilters[lastIndex]);
             }

@@ -33,7 +33,7 @@ namespace KrisMecn.Extensions
 
         public DiscordEmoji FromDigit(int number)
         {
-            if(number > 10)
+            if (number > 10)
             {
                 throw new ArgumentOutOfRangeException();
             }
@@ -50,7 +50,7 @@ namespace KrisMecn.Extensions
                 ret.Add(FromDigit(i + startNum));
             }
 
-            if(withCancel) ret.Add(Cancel);
+            if (withCancel) ret.Add(Cancel);
 
             return ret;
         }

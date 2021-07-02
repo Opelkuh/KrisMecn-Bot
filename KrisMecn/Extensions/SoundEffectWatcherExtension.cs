@@ -1,12 +1,10 @@
 ﻿using DSharpPlus;
-using KrisMecn.Commands;
-using KrisMecn.Attributes;
-using System;
-using System.IO;
-using System.Collections.Generic;
-using System.Text;
-using DSharpPlus.CommandsNext.Builders;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.CommandsNext.Builders;
+using KrisMecn.Attributes;
+using KrisMecn.Commands;
+using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace KrisMecn.Extensions
@@ -42,7 +40,7 @@ namespace KrisMecn.Extensions
             _fsWatcher.Renamed += FsWatcher_Renamed;
 
             // register file filters
-            foreach(var extension in AllowedExtensions)
+            foreach (var extension in AllowedExtensions)
                 _fsWatcher.Filters.Add($"*{extension}");
         }
 
@@ -65,7 +63,7 @@ namespace KrisMecn.Extensions
             var cmdName = GetCommandNameFromPath(fullPath);
 
             // check if we're not trying to register a duplicate command
-            if(cmdNext.RegisteredCommands.ContainsKey(cmdName))
+            if (cmdNext.RegisteredCommands.ContainsKey(cmdName))
             {
                 Logger.Error("Sound Effect Watcher Error", $"Tried to register command name '{cmdName}' that already existed!");
                 return;
@@ -103,7 +101,7 @@ namespace KrisMecn.Extensions
 
         protected void RegisterAllFilesFromPath(string path)
         {
-            foreach(string filePath in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
+            foreach (string filePath in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
             {
                 var extension = Path.GetExtension(filePath);
                 if (!AllowedExtensions.Contains(extension)) continue;
@@ -115,7 +113,7 @@ namespace KrisMecn.Extensions
         private void FsWatcher_Changed(object sender, FileSystemEventArgs e)
         {
             var path = e.FullPath;
-            switch(e.ChangeType)
+            switch (e.ChangeType)
             {
                 case WatcherChangeTypes.Created:
                     RegisterSoundEffectFromFile(path); break;

@@ -1,13 +1,13 @@
-﻿using System;
+﻿using DSharpPlus.Entities;
+using DSharpPlus.VoiceNext.Codec;
+using DSharpPlus.VoiceNext.Entities;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using DSharpPlus.Entities;
-using DSharpPlus.VoiceNext.Codec;
-using DSharpPlus.VoiceNext.Entities;
 
 namespace DSharpPlus.VoiceNext
 {
@@ -83,7 +83,7 @@ namespace DSharpPlus.VoiceNext
         private Memory<byte> PcmMemory { get; }
         private int PcmBufferLength { get; set; }
         private CancellationTokenSource StreamCloseTokenSource { get; set; }
-        
+
         private List<IVoiceFilter> Filters { get; }
 
         internal VoiceTransmitStream(VoiceNextConnection vnc, int pcmBufferDuration)
@@ -211,7 +211,7 @@ namespace DSharpPlus.VoiceNext
         /// </summary>
         public override void Flush()
         {
-            lock(this.PcmBuffer)
+            lock (this.PcmBuffer)
             {
                 var pcm = this.PcmMemory.Span;
                 Helpers.ZeroFill(pcm.Slice(this.PcmBufferLength));
@@ -279,7 +279,7 @@ namespace DSharpPlus.VoiceNext
         {
             StreamCloseTokenSource.Cancel();
             StreamCloseTokenSource = new CancellationTokenSource();
-            
+
             IsPlaying = false;
             CurrentPlaybackInfo = null;
         }

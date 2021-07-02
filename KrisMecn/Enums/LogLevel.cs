@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace KrisMecn.Enums
+﻿namespace KrisMecn.Enums
 {
     enum LogLevel
     {

@@ -1,9 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
+// This file is part of the DSharpPlus project.
+//
+// Copyright (c) 2015 Mike Santiago
+// Copyright (c) 2016-2021 DSharpPlus Contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.CommandsNext.Builders;
 using DSharpPlus.CommandsNext.Converters;
@@ -11,7 +28,15 @@ using DSharpPlus.CommandsNext.Entities;
 using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using Emzi0767.Utilities;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace DSharpPlus.CommandsNext
 {
@@ -110,7 +135,7 @@ namespace DSharpPlus.CommandsNext
 
                 var xcvt = ncvt.MakeGenericType(xt);
                 var xnt = nt.MakeGenericType(xt);
-                if (ArgumentConverters.ContainsKey(xcvt))
+                if (this.ArgumentConverters.ContainsKey(xcvt))
                     continue;
 
                 var xcv = Activator.CreateInstance(xcvt) as IArgumentConverter;
@@ -128,10 +153,7 @@ namespace DSharpPlus.CommandsNext
         /// Sets the help formatter to use with the default help command.
         /// </summary>
         /// <typeparam name="T">Type of the formatter to use.</typeparam>
-        public void SetHelpFormatter<T>() where T : BaseHelpFormatter
-        {
-            this.HelpFormatter.SetFormatterType<T>();
-        }
+        public void SetHelpFormatter<T>() where T : BaseHelpFormatter => this.HelpFormatter.SetFormatterType<T>();
 
         #region DiscordClient Registration
         /// <summary>
@@ -146,23 +168,23 @@ namespace DSharpPlus.CommandsNext
 
             this.Client = client;
 
-            this._executed = new AsyncEvent<CommandExecutionEventArgs>(this.Client.EventErrorHandler, "COMMAND_EXECUTED");
-            this._error = new AsyncEvent<CommandErrorEventArgs>(this.Client.EventErrorHandler, "COMMAND_ERRORED");
+            this._executed = new AsyncEvent<CommandsNextExtension, CommandExecutionEventArgs>("COMMAND_EXECUTED", TimeSpan.Zero, this.Client.EventErrorHandler);
+            this._error = new AsyncEvent<CommandsNextExtension, CommandErrorEventArgs>("COMMAND_ERRORED", TimeSpan.Zero, this.Client.EventErrorHandler);
 
             if (this.Config.UseDefaultCommandHandler)
                 this.Client.MessageCreated += this.HandleCommandsAsync;
             else
-                this.Client.DebugLogger.LogMessage(LogLevel.Warning, "CommandsNext", "Default command handler is not attached. If this was intentional, you can ignore this message.", DateTime.Now);
+                this.Client.Logger.LogWarning(CommandsNextEvents.Misc, "Not attaching default command handler - if this is intentional, you can ignore this message");
 
             if (this.Config.EnableDefaultHelp)
             {
-                this.RegisterCommands(typeof(DefaultHelpModule), null, out var tcmds);
+                this.RegisterCommands(typeof(DefaultHelpModule), null, null, out var tcmds);
 
                 if (this.Config.DefaultHelpChecks != null)
                 {
                     var checks = this.Config.DefaultHelpChecks.ToArray();
 
-                    for (int i = 0; i < tcmds.Count; i++)
+                    for (var i = 0; i < tcmds.Count; i++)
                         tcmds[i].WithExecutionChecks(checks);
                 }
 
@@ -175,7 +197,7 @@ namespace DSharpPlus.CommandsNext
         #endregion
 
         #region Command Handling
-        private async Task HandleCommandsAsync(MessageCreateEventArgs e)
+        private async Task HandleCommandsAsync(DiscordClient sender, MessageCreateEventArgs e)
         {
             if (e.Author.IsBot) // bad bot
                 return;
@@ -208,11 +230,11 @@ namespace DSharpPlus.CommandsNext
             var ctx = this.CreateContext(e.Message, pfx, cmd, args);
             if (cmd == null)
             {
-                await this._error.InvokeAsync(new CommandErrorEventArgs { Context = ctx, Exception = new CommandNotFoundException(fname) }).ConfigureAwait(false);
+                await this._error.InvokeAsync(this, new CommandErrorEventArgs { Context = ctx, Exception = new CommandNotFoundException(fname) }).ConfigureAwait(false);
                 return;
             }
 
-            _ = Task.Run(async () => await this.ExecuteCommandAsync(ctx));
+            _ = Task.Run(async () => await this.ExecuteCommandAsync(ctx).ConfigureAwait(false));
         }
 
         /// <summary>
@@ -249,7 +271,7 @@ namespace DSharpPlus.CommandsNext
                 rawArguments = commandString.Substring(pos).Trim();
                 return cmd;
             }
-            
+
             while (cmd is CommandGroup)
             {
                 var cm2 = cmd as CommandGroup;
@@ -327,13 +349,13 @@ namespace DSharpPlus.CommandsNext
                 var res = await cmd.ExecuteAsync(ctx).ConfigureAwait(false);
 
                 if (res.IsSuccessful)
-                    await this._executed.InvokeAsync(new CommandExecutionEventArgs { Context = res.Context }).ConfigureAwait(false);
+                    await this._executed.InvokeAsync(this, new CommandExecutionEventArgs { Context = res.Context }).ConfigureAwait(false);
                 else
-                    await this._error.InvokeAsync(new CommandErrorEventArgs { Context = res.Context, Exception = res.Exception }).ConfigureAwait(false);
+                    await this._error.InvokeAsync(this, new CommandErrorEventArgs { Context = res.Context, Exception = res.Exception }).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                await this._error.InvokeAsync(new CommandErrorEventArgs { Context = ctx, Exception = ex }).ConfigureAwait(false);
+                await this._error.InvokeAsync(this, new CommandErrorEventArgs { Context = ctx, Exception = ex }).ConfigureAwait(false);
             }
             finally
             {
@@ -400,25 +422,27 @@ namespace DSharpPlus.CommandsNext
             if (!t.IsModuleCandidateType())
                 throw new ArgumentNullException(nameof(t), "Type must be a class, which cannot be abstract or static.");
 
-            this.RegisterCommands(t, null, out var tempCommands);
+            this.RegisterCommands(t, null, null, out var tempCommands);
 
             if (tempCommands != null)
                 foreach (var command in tempCommands)
                     this.AddToCommandDictionary(command.Build(null));
         }
 
-        private void RegisterCommands(Type t, CommandGroupBuilder currentParent, out List<CommandBuilder> foundCommands)
+        private void RegisterCommands(Type t, CommandGroupBuilder currentParent, IEnumerable<CheckBaseAttribute> inheritedChecks, out List<CommandBuilder> foundCommands)
         {
             var ti = t.GetTypeInfo();
 
             var lifespan = ti.GetCustomAttribute<ModuleLifespanAttribute>();
+            var moduleLifespan = lifespan != null ? lifespan.Lifespan : ModuleLifespan.Singleton;
+
             var module = new CommandModuleBuilder()
                 .WithType(t)
-                .WithLifespan(lifespan != null ? lifespan.Lifespan : ModuleLifespan.Singleton)
+                .WithLifespan(moduleLifespan)
                 .Build(this.Services);
 
             // restrict parent lifespan to more or equally restrictive
-            if (currentParent?.Module is TransientCommandModule && lifespan.Lifespan != ModuleLifespan.Transient)
+            if (currentParent?.Module is TransientCommandModule && moduleLifespan != ModuleLifespan.Transient)
                 throw new InvalidOperationException("In a transient module, child modules can only be transient.");
 
             // check if we are anything
@@ -427,6 +451,7 @@ namespace DSharpPlus.CommandsNext
             var moduleAttributes = ti.GetCustomAttributes();
             var moduleHidden = false;
             var moduleChecks = new List<CheckBaseAttribute>();
+
             foreach (var xa in moduleAttributes)
             {
                 switch (xa)
@@ -450,7 +475,11 @@ namespace DSharpPlus.CommandsNext
                             moduleName = moduleName.ToLowerInvariant();
 
                         groupBuilder.WithName(moduleName);
-                        
+
+                        if (inheritedChecks != null)
+                            foreach (var chk in inheritedChecks)
+                                groupBuilder.WithExecutionCheck(chk);
+
                         foreach (var mi in ti.DeclaredMethods.Where(x => x.IsCommandCandidate(out _) && x.GetCustomAttribute<GroupCommandAttribute>() != null))
                             groupBuilder.WithOverload(new CommandOverloadBuilder(mi));
                         break;
@@ -481,7 +510,11 @@ namespace DSharpPlus.CommandsNext
             }
 
             if (!isModule)
+            {
                 groupBuilder = null;
+                if (inheritedChecks != null)
+                    moduleChecks.AddRange(inheritedChecks);
+            }
 
             // candidate methods
             var methods = ti.DeclaredMethods;
@@ -493,7 +526,7 @@ namespace DSharpPlus.CommandsNext
                     continue;
 
                 var attrs = m.GetCustomAttributes();
-                if (!(attrs.FirstOrDefault(xa => xa is CommandAttribute) is CommandAttribute cattr))
+                if (attrs.FirstOrDefault(xa => xa is CommandAttribute) is not CommandAttribute cattr)
                     continue;
 
                 var commandName = cattr.Name;
@@ -562,11 +595,18 @@ namespace DSharpPlus.CommandsNext
                 .Where(xt => xt.IsModuleCandidateType() && xt.DeclaredConstructors.Any(xc => xc.IsPublic));
             foreach (var type in types)
             {
-                this.RegisterCommands(type.AsType(), groupBuilder, out var tempCommands);
+                this.RegisterCommands(type.AsType(),
+                    groupBuilder,
+                    !isModule ? moduleChecks : null,
+                    out var tempCommands);
+
+                if (isModule)
+                    foreach (var chk in moduleChecks)
+                        groupBuilder.WithExecutionCheck(chk);
 
                 if (isModule && tempCommands != null)
-                        foreach (var xtcmd in tempCommands)
-                            groupBuilder.WithChild(xtcmd);
+                    foreach (var xtcmd in tempCommands)
+                        groupBuilder.WithChild(xtcmd);
                 else if (tempCommands != null)
                     commands.AddRange(tempCommands);
             }
@@ -639,10 +679,9 @@ namespace DSharpPlus.CommandsNext
                             break;
                         }
 
-                        if (ctx.Config.CaseSensitive)
-                            cmd = searchIn.FirstOrDefault(xc => xc.Name == c || (xc.Aliases != null && xc.Aliases.Contains(c)));
-                        else
-                            cmd = searchIn.FirstOrDefault(xc => xc.Name.ToLowerInvariant() == c.ToLowerInvariant() || (xc.Aliases != null && xc.Aliases.Select(xs => xs.ToLowerInvariant()).Contains(c.ToLowerInvariant())));
+                        cmd = ctx.Config.CaseSensitive
+                            ? searchIn.FirstOrDefault(xc => xc.Name == c || (xc.Aliases != null && xc.Aliases.Contains(c)))
+                            : searchIn.FirstOrDefault(xc => xc.Name.ToLowerInvariant() == c.ToLowerInvariant() || (xc.Aliases != null && xc.Aliases.Select(xs => xs.ToLowerInvariant()).Contains(c.ToLowerInvariant())));
 
                         if (cmd == null)
                             break;
@@ -651,10 +690,7 @@ namespace DSharpPlus.CommandsNext
                         if (failedChecks.Any())
                             throw new ChecksFailedException(cmd, ctx, failedChecks);
 
-                        if (cmd is CommandGroup)
-                            searchIn = (cmd as CommandGroup).Children;
-                        else
-                            searchIn = null;
+                        searchIn = cmd is CommandGroup ? (cmd as CommandGroup).Children : null;
                     }
 
                     if (cmd == null)
@@ -706,10 +742,13 @@ namespace DSharpPlus.CommandsNext
 
                 var helpMessage = helpBuilder.Build();
 
+                var builder = new DiscordMessageBuilder().WithContent(helpMessage.Content).WithEmbed(helpMessage.Embed);
+
                 if (!ctx.Config.DmHelp || ctx.Channel is DiscordDmChannel || ctx.Guild == null)
-                    await ctx.RespondAsync(helpMessage.Content, embed: helpMessage.Embed).ConfigureAwait(false);
+                    await ctx.RespondAsync(builder).ConfigureAwait(false);
                 else
-                    await ctx.Member.SendMessageAsync(helpMessage.Content, embed: helpMessage.Embed).ConfigureAwait(false);
+                    await ctx.Member.SendMessageAsync(builder).ConfigureAwait(false);
+
             }
         }
         #endregion
@@ -807,14 +846,11 @@ namespace DSharpPlus.CommandsNext
             if (!this.ArgumentConverters.ContainsKey(t))
                 throw new ArgumentException("There is no converter specified for given type.", nameof(T));
 
-            if (!(this.ArgumentConverters[t] is IArgumentConverter<T> cv))
+            if (this.ArgumentConverters[t] is not IArgumentConverter<T> cv)
                 throw new ArgumentException("Invalid converter registered for this type.", nameof(T));
 
             var cvr = await cv.ConvertAsync(value, ctx).ConfigureAwait(false);
-            if (!cvr.HasValue)
-                throw new ArgumentException("Could not convert specified value to given type.", nameof(value));
-
-            return cvr.Value;
+            return !cvr.HasValue ? throw new ArgumentException("Could not convert specified value to given type.", nameof(value)) : cvr.Value;
         }
 
         /// <summary>
@@ -908,7 +944,6 @@ namespace DSharpPlus.CommandsNext
             if (!ti.IsValueType)
                 return;
 
-            var nullableConverterType = typeof(NullableConverter<>).MakeGenericType(t);
             var nullableType = typeof(Nullable<>).MakeGenericType(t);
             this.UserFriendlyTypeNames[nullableType] = value;
         }
@@ -927,42 +962,51 @@ namespace DSharpPlus.CommandsNext
             if (ti.IsGenericTypeDefinition && t.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
                 var tn = ti.GenericTypeArguments[0];
-                if (this.UserFriendlyTypeNames.ContainsKey(tn))
-                    return this.UserFriendlyTypeNames[tn];
-
-                return tn.Name;
+                return this.UserFriendlyTypeNames.ContainsKey(tn) ? this.UserFriendlyTypeNames[tn] : tn.Name;
             }
 
             return t.Name;
         }
         #endregion
 
+        #region Helpers
+        /// <summary>
+        /// Gets the configuration-specific string comparer. This returns <see cref="StringComparer.Ordinal"/> or <see cref="StringComparer.OrdinalIgnoreCase"/>, 
+        /// depending on whether <see cref="CommandsNextConfiguration.CaseSensitive"/> is set to <see langword="true"/> or <see langword="false"/>.
+        /// </summary>
+        /// <returns>A string comparer.</returns>
+        internal IEqualityComparer<string> GetStringComparer()
+            => this.Config.CaseSensitive
+                ? StringComparer.Ordinal
+                : StringComparer.OrdinalIgnoreCase;
+        #endregion
+
         #region Events
         /// <summary>
         /// Triggered whenever a command executes successfully.
         /// </summary>
-        public event AsyncEventHandler<CommandExecutionEventArgs> CommandExecuted
+        public event AsyncEventHandler<CommandsNextExtension, CommandExecutionEventArgs> CommandExecuted
         {
             add { this._executed.Register(value); }
             remove { this._executed.Unregister(value); }
         }
-        private AsyncEvent<CommandExecutionEventArgs> _executed;
+        private AsyncEvent<CommandsNextExtension, CommandExecutionEventArgs> _executed;
 
         /// <summary>
         /// Triggered whenever a command throws an exception during execution.
         /// </summary>
-        public event AsyncEventHandler<CommandErrorEventArgs> CommandErrored
+        public event AsyncEventHandler<CommandsNextExtension, CommandErrorEventArgs> CommandErrored
         {
             add { this._error.Register(value); }
             remove { this._error.Unregister(value); }
         }
-        private AsyncEvent<CommandErrorEventArgs> _error;
+        private AsyncEvent<CommandsNextExtension, CommandErrorEventArgs> _error;
 
         private Task OnCommandExecuted(CommandExecutionEventArgs e)
-            => this._executed.InvokeAsync(e);
+            => this._executed.InvokeAsync(this, e);
 
         private Task OnCommandErrored(CommandErrorEventArgs e)
-            => this._error.InvokeAsync(e);
+            => this._error.InvokeAsync(this, e);
         #endregion
     }
 }

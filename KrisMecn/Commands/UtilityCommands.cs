@@ -1,12 +1,12 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
+using KrisMecn.Helpers.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using KrisMecn.Helpers.Extensions;
 
 namespace KrisMecn.Commands
 {
@@ -28,7 +28,7 @@ namespace KrisMecn.Commands
         public async Task Uptime(CommandContext ctx)
         {
             var startTimes = ctx.Client.GetBotContext().BotInstance.StartTimes;
-            
+
             // create time strings
             var startTimeStr = (DateTime.Now - startTimes.BotStart).ToString(UPTIME_TIMESTAMP_FORMAT);
             var socketStartTimeStr = (DateTime.Now - startTimes.SocketStart).ToString(UPTIME_TIMESTAMP_FORMAT);
@@ -53,7 +53,7 @@ namespace KrisMecn.Commands
 
             // send help in parts
             // this is to overcome the 2000 character limit
-            foreach(var helpPart in _helpCache)
+            foreach (var helpPart in _helpCache)
             {
                 await ctx.ReplyToDM(helpPart);
             }
@@ -75,16 +75,16 @@ namespace KrisMecn.Commands
         {
             var moduleCmdHelp = new Dictionary<string, List<string>>();
 
-            foreach(var cmd in commands.Distinct())
+            foreach (var cmd in commands.Distinct())
             {
                 // ignore hidden commands
                 if (cmd.IsHidden) continue;
-                
+
                 List<string> helpStrings = new List<string>();
                 var sb = new StringBuilder();
 
                 // add command overloads
-                for(int i = 0; i < cmd.Overloads.Count; i++)
+                for (int i = 0; i < cmd.Overloads.Count; i++)
                 {
                     var ol = cmd.Overloads[i];
 
@@ -146,14 +146,14 @@ namespace KrisMecn.Commands
             // add prefix
             hb.Append(helpPrefix);
 
-            foreach(var moduleName in moduleCmdHelp.Keys)
+            foreach (var moduleName in moduleCmdHelp.Keys)
             {
                 var readableName = Regex.Replace(moduleName, "((?<!^)[A-Z])", " $1").ToUpper();
 
                 hb.AppendFormat("__**{0}**__\n\n", readableName);
-                foreach(var cmdHelp in moduleCmdHelp[moduleName])
+                foreach (var cmdHelp in moduleCmdHelp[moduleName])
                 {
-                    if(hb.Length + cmdHelp.Length + 2 /* newline size */ > hb.MaxCapacity)
+                    if (hb.Length + cmdHelp.Length + 2 /* newline size */ > hb.MaxCapacity)
                     {
                         // finish string builder and start creating a new part
                         ret.Add(hb.ToString());

@@ -1,13 +1,34 @@
-﻿using DSharpPlus.Interactivity.Concurrency;
+// This file is part of the DSharpPlus project.
+//
+// Copyright (c) 2015 Mike Santiago
+// Copyright (c) 2016-2021 DSharpPlus Contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+using ConcurrentCollections;
+using Emzi0767.Utilities;
+using Microsoft.Extensions.Logging;
 using System;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace DSharpPlus.Interactivity.EventHandling
@@ -20,8 +41,8 @@ namespace DSharpPlus.Interactivity.EventHandling
     internal class EventWaiter<T> : IDisposable where T : AsyncEventArgs
     {
         DiscordClient _client;
-        AsyncEvent<T> _event;
-        AsyncEventHandler<T> _handler;
+        AsyncEvent<DiscordClient, T> _event;
+        AsyncEventHandler<DiscordClient, T> _handler;
         ConcurrentHashSet<MatchRequest<T>> _matchrequests;
         ConcurrentHashSet<CollectRequest<T>> _collectrequests;
         bool disposed = false;
@@ -33,13 +54,13 @@ namespace DSharpPlus.Interactivity.EventHandling
         public EventWaiter(DiscordClient client)
         {
             this._client = client;
-            var tinfo = _client.GetType().GetTypeInfo();
-            var handler = tinfo.DeclaredFields.First(x => x.FieldType == typeof(AsyncEvent<T>));
+            var tinfo = this._client.GetType().GetTypeInfo();
+            var handler = tinfo.DeclaredFields.First(x => x.FieldType == typeof(AsyncEvent<DiscordClient, T>));
             this._matchrequests = new ConcurrentHashSet<MatchRequest<T>>();
             this._collectrequests = new ConcurrentHashSet<CollectRequest<T>>();
-            this._event = (AsyncEvent<T>)handler.GetValue(_client);
-            this._handler = new AsyncEventHandler<T>(HandleEvent);
-            this._event.Register(_handler);
+            this._event = (AsyncEvent<DiscordClient, T>)handler.GetValue(this._client);
+            this._handler = new AsyncEventHandler<DiscordClient, T>(this.HandleEvent);
+            this._event.Register(this._handler);
         }
 
         /// <summary>
@@ -53,12 +74,11 @@ namespace DSharpPlus.Interactivity.EventHandling
             this._matchrequests.Add(request);
             try
             {
-                result = await request._tcs.Task;
+                result = await request._tcs.Task.ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                this._client.DebugLogger.LogMessage(LogLevel.Error, "Interactivity", 
-                    $"Something went wrong waiting for {typeof(T).Name} with exception {ex.GetType().Name}.", DateTime.Now);
+                this._client.Logger.LogError(InteractivityEvents.InteractivityWaitError, ex, "An exception occurred while waiting for {0}", typeof(T).Name);
             }
             finally
             {
@@ -74,12 +94,11 @@ namespace DSharpPlus.Interactivity.EventHandling
             this._collectrequests.Add(request);
             try
             {
-                await request._tcs.Task;
+                await request._tcs.Task.ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                this._client.DebugLogger.LogMessage(LogLevel.Error, "Interactivity", 
-                    $"Something went wrong collecting from {typeof(T).Name} with exception {ex.GetType().Name}.", DateTime.Now);
+                this._client.Logger.LogError(InteractivityEvents.InteractivityWaitError, ex, "An exception occurred while collecting from {0}", typeof(T).Name);
             }
             finally
             {
@@ -90,23 +109,19 @@ namespace DSharpPlus.Interactivity.EventHandling
             return result;
         }
 
-        async Task HandleEvent(T eventargs)
+        private Task HandleEvent(DiscordClient client, T eventargs)
         {
-            await Task.Yield();
-            if (!disposed)
+            if (!this.disposed)
             {
-                foreach (var req in _matchrequests)
+                foreach (var req in this._matchrequests)
                 {
                     if (req._predicate(eventargs))
                     {
                         req._tcs.TrySetResult(eventargs);
                     }
                 }
-            }
 
-            if (!disposed)
-            {
-                foreach (var req in _collectrequests)
+                foreach (var req in this._collectrequests)
                 {
                     if (req._predicate(eventargs))
                     {
@@ -114,6 +129,8 @@ namespace DSharpPlus.Interactivity.EventHandling
                     }
                 }
             }
+
+            return Task.CompletedTask;
         }
 
         ~EventWaiter()
@@ -127,16 +144,16 @@ namespace DSharpPlus.Interactivity.EventHandling
         public void Dispose()
         {
             this.disposed = true;
-            if(this._event != null)
-                this._event.Unregister(_handler);
+            if (this._event != null)
+                this._event.Unregister(this._handler);
 
             this._event = null;
             this._handler = null;
             this._client = null;
 
-            if(this._matchrequests != null)
+            if (this._matchrequests != null)
                 this._matchrequests.Clear();
-            if(this._collectrequests != null)
+            if (this._collectrequests != null)
                 this._collectrequests.Clear();
 
             this._matchrequests = null;

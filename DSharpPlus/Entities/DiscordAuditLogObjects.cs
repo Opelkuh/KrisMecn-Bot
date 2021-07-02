@@ -1,4 +1,27 @@
-﻿using System.Collections.Generic;
+// This file is part of the DSharpPlus project.
+//
+// Copyright (c) 2015 Mike Santiago
+// Copyright (c) 2016-2021 DSharpPlus Contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+using System.Collections.Generic;
 
 namespace DSharpPlus.Entities
 {
@@ -53,32 +76,32 @@ namespace DSharpPlus.Entities
         public DiscordGuild Target { get; internal set; }
 
         /// <summary>
-        /// Gets the the description of guild name's change.
+        /// Gets the description of guild name's change.
         /// </summary>
         public PropertyChange<string> NameChange { get; internal set; }
 
         /// <summary>
-        /// Gets the the description of owner's change.
+        /// Gets the description of owner's change.
         /// </summary>
         public PropertyChange<DiscordMember> OwnerChange { get; internal set; }
 
         /// <summary>
-        /// Gets the the description of icon's change.
+        /// Gets the description of icon's change.
         /// </summary>
         public PropertyChange<string> IconChange { get; internal set; }
 
         /// <summary>
-        /// Gets the the description of verification level's change.
+        /// Gets the description of verification level's change.
         /// </summary>
         public PropertyChange<VerificationLevel> VerificationLevelChange { get; internal set; }
 
         /// <summary>
-        /// Gets the the description of afk channel's change.
+        /// Gets the description of afk channel's change.
         /// </summary>
         public PropertyChange<DiscordChannel> AfkChannelChange { get; internal set; }
 
         /// <summary>
-        /// Gets the the description of widget channel's change.
+        /// Gets the description of widget channel's change.
         /// </summary>
         public PropertyChange<DiscordChannel> EmbedChannelChange { get; internal set; }
 
@@ -211,7 +234,7 @@ namespace DSharpPlus.Entities
         /// Gets the number inactivity days after which members were pruned.
         /// </summary>
         public int Days { get; internal set; }
-        
+
         /// <summary>
         /// Gets the number of members pruned.
         /// </summary>
@@ -356,7 +379,7 @@ namespace DSharpPlus.Entities
         /// Gets the affected webhook.
         /// </summary>
         public DiscordWebhook Target { get; internal set; }
-        
+
         /// <summary>
         /// Gets the description of webhook's name change.
         /// </summary>
@@ -403,7 +426,7 @@ namespace DSharpPlus.Entities
         public DiscordMessage Target { get; internal set; }
 
         /// <summary>
-        /// Gets the channel in which the action occured.
+        /// Gets the channel in which the action occurred.
         /// </summary>
         public DiscordChannel Channel { get; internal set; }
 

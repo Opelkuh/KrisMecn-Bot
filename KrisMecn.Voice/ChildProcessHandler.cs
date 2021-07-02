@@ -29,7 +29,7 @@ namespace KrisMecn.Voice
                     Arguments = _testArguments,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
-                }; 
+                };
 
                 var process = Process.Start(processInfo);
 
@@ -73,7 +73,8 @@ namespace KrisMecn.Voice
                 try
                 {
                     RunningProcess.Kill();
-                } catch(Exception) { }
+                }
+                catch (Exception) { }
 
                 RunningProcess.Dispose();
             }

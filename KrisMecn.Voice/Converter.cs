@@ -1,6 +1,5 @@
 ﻿using KrisMecn.Voice.Builders;
 using KrisMecn.Voice.Streams;
-using System;
 using System.Diagnostics;
 
 namespace KrisMecn.Voice

@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Threading.Tasks;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Net;
 using DSharpPlus.VoiceNext.Entities;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace DSharpPlus.VoiceNext
 {
@@ -144,7 +144,7 @@ namespace DSharpPlus.VoiceNext
             await (guild.Discord as DiscordClient)._webSocketClient.SendMessageAsync(vsj).ConfigureAwait(false);
         }
 
-        private Task Client_VoiceStateUpdate(VoiceStateUpdateEventArgs e)
+        private Task Client_VoiceStateUpdate(DiscordClient c, VoiceStateUpdateEventArgs e)
         {
             var gld = e.Guild;
             if (gld == null)
@@ -167,7 +167,7 @@ namespace DSharpPlus.VoiceNext
             return Task.CompletedTask;
         }
 
-        private async Task Client_VoiceServerUpdate(VoiceServerUpdateEventArgs e)
+        private async Task Client_VoiceServerUpdate(DiscordClient c, VoiceServerUpdateEventArgs e)
         {
             var gld = e.Guild;
             if (gld == null)

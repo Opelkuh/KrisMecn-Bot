@@ -1,8 +1,32 @@
-﻿using System;
+// This file is part of the DSharpPlus project.
+//
+// Copyright (c) 2015 Mike Santiago
+// Copyright (c) 2016-2021 DSharpPlus Contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+using DSharpPlus.EventArgs;
+using Emzi0767.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
-using DSharpPlus.EventArgs;
 
 namespace DSharpPlus.Net.WebSocket
 {
@@ -65,21 +89,21 @@ namespace DSharpPlus.Net.WebSocket
         /// <summary>
         /// Triggered when the client connects successfully.
         /// </summary>
-        event AsyncEventHandler Connected;
+        event AsyncEventHandler<IWebSocketClient, SocketEventArgs> Connected;
 
         /// <summary>
         /// Triggered when the client is disconnected.
         /// </summary>
-        event AsyncEventHandler<SocketCloseEventArgs> Disconnected;
+        event AsyncEventHandler<IWebSocketClient, SocketCloseEventArgs> Disconnected;
 
         /// <summary>
         /// Triggered when the client receives a message from the remote party.
         /// </summary>
-        event AsyncEventHandler<SocketMessageEventArgs> MessageReceived;
+        event AsyncEventHandler<IWebSocketClient, SocketMessageEventArgs> MessageReceived;
 
         /// <summary>
         /// Triggered when an error occurs in the client.
         /// </summary>
-        event AsyncEventHandler<SocketErrorEventArgs> ExceptionThrown;
+        event AsyncEventHandler<IWebSocketClient, SocketErrorEventArgs> ExceptionThrown;
     }
 }

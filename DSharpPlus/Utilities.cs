@@ -1,12 +1,38 @@
-﻿using System;
+// This file is part of the DSharpPlus project.
+//
+// Copyright (c) 2015 Mike Santiago
+// Copyright (c) 2016-2021 DSharpPlus Contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+using DSharpPlus.Entities;
+using DSharpPlus.Net;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using DSharpPlus.Entities;
-using DSharpPlus.Net;
+using System.Threading.Tasks;
 
 namespace DSharpPlus
 {
@@ -54,86 +80,68 @@ namespace DSharpPlus
             VersionHeader = $"DiscordBot (https://github.com/DSharpPlus/DSharpPlus, v{vs})";
         }
 
-        internal static int CalculateIntegrity(int ping, DateTimeOffset timestamp, int heartbeat_interval)
-        {
-            Random r = new Random();
-            return r.Next(ping, int.MaxValue);
-        }
-
-        internal static string GetApiBaseUri() 
+        internal static string GetApiBaseUri()
             => Endpoints.BASE_URI;
 
         internal static Uri GetApiUriFor(string path)
-            => new Uri($"{GetApiBaseUri()}{path}");
+            => new($"{GetApiBaseUri()}{path}");
 
         internal static Uri GetApiUriFor(string path, string queryString)
-            => new Uri($"{GetApiBaseUri()}{path}{queryString}");
+            => new($"{GetApiBaseUri()}{path}{queryString}");
 
         internal static QueryUriBuilder GetApiUriBuilderFor(string path)
-            => new QueryUriBuilder($"{GetApiBaseUri()}{path}");
+            => new($"{GetApiBaseUri()}{path}");
 
-        internal static string GetFormattedToken(BaseDiscordClient client)
-        {
-            return GetFormattedToken(client.Configuration);
-        }
+        internal static string GetFormattedToken(BaseDiscordClient client) => GetFormattedToken(client.Configuration);
 
         internal static string GetFormattedToken(DiscordConfiguration config)
-        { 
-            switch (config.TokenType)
+        {
+            return config.TokenType switch
             {
-                case TokenType.Bearer:
-                    {
-                        return $"Bearer {config.Token}";
-                    }
-                case TokenType.Bot:
-                    {
-                        return $"Bot {config.Token}";
-                    }
-                default:
-                    {
-                        return config.Token;
-                    }
-            }
+                TokenType.Bearer => $"Bearer {config.Token}",
+                TokenType.Bot => $"Bot {config.Token}",
+                _ => throw new ArgumentException("Invalid token type specified.", nameof(config.Token)),
+            };
         }
 
         internal static Dictionary<string, string> GetBaseHeaders()
-            => new Dictionary<string, string>();
+            => new();
 
         internal static string GetUserAgent()
             => VersionHeader;
 
         internal static bool ContainsUserMentions(string message)
         {
-            string pattern = @"<@(\d+)>";
-            Regex regex = new Regex(pattern, RegexOptions.ECMAScript);
+            var pattern = @"<@(\d+)>";
+            var regex = new Regex(pattern, RegexOptions.ECMAScript);
             return regex.IsMatch(message);
         }
 
         internal static bool ContainsNicknameMentions(string message)
         {
-            string pattern = @"<@!(\d+)>";
-            Regex regex = new Regex(pattern, RegexOptions.ECMAScript);
+            var pattern = @"<@!(\d+)>";
+            var regex = new Regex(pattern, RegexOptions.ECMAScript);
             return regex.IsMatch(message);
         }
 
         internal static bool ContainsChannelMentions(string message)
         {
-            string pattern = @"<#(\d+)>";
-            Regex regex = new Regex(pattern, RegexOptions.ECMAScript);
+            var pattern = @"<#(\d+)>";
+            var regex = new Regex(pattern, RegexOptions.ECMAScript);
             return regex.IsMatch(message);
         }
 
         internal static bool ContainsRoleMentions(string message)
         {
-            string pattern = @"<@&(\d+)>";
-            Regex regex = new Regex(pattern, RegexOptions.ECMAScript);
+            var pattern = @"<@&(\d+)>";
+            var regex = new Regex(pattern, RegexOptions.ECMAScript);
             return regex.IsMatch(message);
         }
 
         internal static bool ContainsEmojis(string message)
         {
-            string pattern = @"<:(.*):(\d+)>";
-            Regex regex = new Regex(pattern, RegexOptions.ECMAScript);
+            var pattern = @"<a?:(.*):(\d+)>";
+            var regex = new Regex(pattern, RegexOptions.ECMAScript);
             return regex.IsMatch(message);
         }
 
@@ -163,11 +171,36 @@ namespace DSharpPlus
 
         internal static IEnumerable<ulong> GetEmojis(DiscordMessage message)
         {
-            var regex = new Regex(@"<:([a-zA-Z0-9_]+):(\d+)>", RegexOptions.ECMAScript);
+            var regex = new Regex(@"<a?:([a-zA-Z0-9_]+):(\d+)>", RegexOptions.ECMAScript);
             var matches = regex.Matches(message.Content);
             foreach (Match match in matches)
                 yield return ulong.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture);
         }
+
+        internal static bool IsValidSlashCommandName(string name)
+        {
+            var regex = new Regex(@"^[\w-]{1,32}$", RegexOptions.ECMAScript);
+            return regex.IsMatch(name);
+        }
+
+        internal static bool HasMessageIntents(DiscordIntents intents)
+            => intents.HasIntent(DiscordIntents.GuildMessages) || intents.HasIntent(DiscordIntents.DirectMessages);
+
+        internal static bool HasReactionIntents(DiscordIntents intents)
+            => intents.HasIntent(DiscordIntents.GuildMessageReactions) || intents.HasIntent(DiscordIntents.DirectMessageReactions);
+
+        internal static bool HasTypingIntents(DiscordIntents intents)
+            => intents.HasIntent(DiscordIntents.GuildMessageTyping) || intents.HasIntent(DiscordIntents.DirectMessageTyping);
+
+        // https://discord.com/developers/docs/topics/gateway#sharding-sharding-formula
+        /// <summary>
+        /// Gets a shard id from a guild id and total shard count.
+        /// </summary>
+        /// <param name="guildId">The guild id the shard is on.</param>
+        /// <param name="shardCount">The total amount of shards.</param>
+        /// <returns>The shard id.</returns>
+        public static int GetShardId(ulong guildId, int shardCount)
+            => (int)((guildId >> 22) % (ulong)shardCount);
 
         /// <summary>
         /// Helper method to create a <see cref="DateTimeOffset"/> from Unix time seconds for targets that do not support this natively.
@@ -212,13 +245,22 @@ namespace DSharpPlus
         }
 
         /// <summary>
-        /// Helper method to calculate Unix time seconsd from a <see cref="DateTimeOffset"/> for targets that do not support this natively.
+        /// Helper method to calculate Unix time seconds from a <see cref="DateTimeOffset"/> for targets that do not support this natively.
         /// </summary>
         /// <param name="dto"><see cref="DateTimeOffset"/> to calculate Unix time for.</param>
         /// <returns>Calculated Unix time.</returns>
         public static long GetUnixTime(DateTimeOffset dto)
             => dto.ToUnixTimeMilliseconds();
-        
+
+        /// <summary>
+        /// Computes a timestamp from a given snowflake.
+        /// </summary>
+        /// <param name="snowflake">Snowflake to compute a timestamp from.</param>
+        /// <returns>Computed timestamp.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static DateTimeOffset GetSnowflakeTime(this ulong snowflake)
+            => DiscordClient.DiscordEpoch.AddMilliseconds(snowflake >> 22);
+
         /// <summary>
         /// Converts this <see cref="Permissions"/> into human-readable format.
         /// </summary>
@@ -251,6 +293,17 @@ namespace DSharpPlus
                     return true;
 
             return false;
+        }
+
+        internal static void LogTaskFault(this Task task, ILogger logger, LogLevel level, EventId eventId, string message)
+        {
+            if (task == null)
+                throw new ArgumentNullException(nameof(task));
+
+            if (logger == null)
+                return;
+
+            task.ContinueWith(t => logger.Log(level, eventId, t.Exception, message), TaskContinuationOptions.OnlyOnFaulted);
         }
 
         internal static void Deconstruct<TKey, TValue>(this KeyValuePair<TKey, TValue> kvp, out TKey key, out TValue value)

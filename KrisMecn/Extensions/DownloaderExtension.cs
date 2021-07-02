@@ -1,8 +1,5 @@
 ﻿using DSharpPlus;
 using KrisMecn.Voice;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace KrisMecn.Extensions
 {

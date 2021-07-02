@@ -36,7 +36,7 @@ namespace KrisMecn
                 .Append(message);
 
             // add optional data
-            if(data != null)
+            if (data != null)
             {
                 sb.Append(" - ")
                   .Append(data.ToString());

@@ -1,12 +1,12 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
-using System.Threading.Tasks;
-using System;
-using System.Collections.Generic;
 using DSharpPlus.Entities;
-using System.Text;
 using KrisMecn.Attributes;
 using KrisMecn.Helpers.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace KrisMecn.Commands
 {
@@ -140,7 +140,7 @@ namespace KrisMecn.Commands
             var videoTitle = video.Snippet.Title;
             var channelTitle = video.Snippet.ChannelTitle;
             var thumbnails = video.Snippet.Thumbnails;
-            var targetThumbnail = 
+            var targetThumbnail =
                 thumbnails.High ??
                 thumbnails.Medium ??
                 thumbnails.Standard ??
@@ -151,7 +151,7 @@ namespace KrisMecn.Commands
             var videoUri = new Uri($"https://youtu.be/{videoId}");
             var playbackInfo = ctx.GeneratePlaybackInfoEmbed(videoUri)
                 .WithTitle($"{ctx.Prefix}{ctx.Command.QualifiedName} {ctx.RawArgumentString}")
-                .WithThumbnailUrl(thumbnailUrl ?? "")
+                .WithThumbnail(thumbnailUrl ?? "")
                 .AddField("Title", videoTitle, true)
                 .AddField("Channel Name", channelTitle, true)
                 .WithColor(YOUTUBE_COLOR);
@@ -168,7 +168,7 @@ namespace KrisMecn.Commands
         public async Task Volume(CommandContext ctx, string percentage)
         {
             double outVolume;
-            switch(percentage)
+            switch (percentage)
             {
                 case "doprava":
                     outVolume = 6;
@@ -182,7 +182,7 @@ namespace KrisMecn.Commands
 
                     break;
             }
-            
+
             // change volume
             var voiceCon = await ctx.GetVoiceConnection(true);
 

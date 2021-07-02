@@ -1,9 +1,9 @@
 ﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Entities;
+using DSharpPlus.Entities;
+using KrisMecn.Helpers.Extensions;
 using System;
 using System.Threading.Tasks;
-using KrisMecn.Helpers.Extensions;
-using DSharpPlus.Entities;
 
 namespace KrisMecn.Commands
 {
@@ -25,11 +25,12 @@ namespace KrisMecn.Commands
                 try
                 {
                     await ctx.Message.DeleteAsync();
-                } catch(Exception) { }
+                }
+                catch (Exception) { }
 
                 var playbackInfo = ctx.GeneratePlaybackInfoEmbed()
                     .WithDescription("Built-in sound file")
-                    .WithThumbnailUrl(ctx.Client.CurrentUser.AvatarUrl)
+                    .WithThumbnail(ctx.Client.CurrentUser.AvatarUrl)
                     .WithColor(new DiscordColor("#EBA991"));
 
                 await ctx.PlayFromFile(filePath, playbackInfo).ConfigureAwait(false);

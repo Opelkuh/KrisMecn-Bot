@@ -1,15 +1,15 @@
 ﻿using DSharpPlus.Entities;
-using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace KrisMecn.Helpers.Extensions
 {
     static class DiscordMessageExtensions
     {
-        public async static Task<int> PollUserAsync(this DiscordMessage msg, DiscordUser user, DiscordEmoji[] emoji, int timeout)
+        public async static Task<int> PollUserAsync(this DiscordMessage msg, DiscordUser user, DiscordEmoji[] emoji, int timeout, bool removeReactions = false)
         {
             var tokenSource = new CancellationTokenSource();
             _ = msg.CreateReactionsAsync(emoji, tokenSource.Token);
@@ -28,7 +28,14 @@ namespace KrisMecn.Helpers.Extensions
                 for (int i = 0; i < emoji.Length; i++)
                 {
                     var re = reaction.Result.Emoji;
-                    if (emoji[i].Id == re.Id && emoji[i].Name == re.Name) return i;
+                    if (emoji[i].Id == re.Id && emoji[i].Name == re.Name)
+                    {
+                        tokenSource.Cancel();
+
+                        if (removeReactions) await msg.DeleteOwnReactionsAsync(emoji);
+
+                        return i;
+                    }
                 }
 
                 // try again, adjust timeout for the duration that the user took to react
@@ -37,6 +44,10 @@ namespace KrisMecn.Helpers.Extensions
             }
 
             tokenSource.Cancel();
+
+            // remove reactions if requested
+            if (removeReactions) await msg.DeleteOwnReactionsAsync(emoji);
+
             return -1;
         }
 
@@ -47,6 +58,14 @@ namespace KrisMecn.Helpers.Extensions
                 if (cancellationToken.IsCancellationRequested) return;
 
                 await msg.CreateReactionAsync(emoji);
+            }
+        }
+
+        public async static Task DeleteOwnReactionsAsync(this DiscordMessage msg, IEnumerable<DiscordEmoji> emojis)
+        {
+            foreach (var emoji in emojis)
+            {
+                await msg.DeleteOwnReactionAsync(emoji);
             }
         }
     }

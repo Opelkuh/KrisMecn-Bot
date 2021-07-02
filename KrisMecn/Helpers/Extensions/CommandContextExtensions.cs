@@ -6,12 +6,18 @@ namespace KrisMecn.Helpers.Extensions
 {
     static class CommandContextExtensions
     {
-        public static Task<DiscordMessage> ReplyToDM(this CommandContext ctx, string content = null, bool isTTS = false, DiscordEmbed embed = null)
+        public static Task<DiscordMessage> ReplyToDM(this CommandContext ctx, string content = null, DiscordEmbed embed = null)
         {
             if (ctx.Member == null)
-                return ctx.RespondAsync(content, isTTS, embed);
+            {
+                if (embed is null) return ctx.RespondAsync(content);
+                else return ctx.RespondAsync(content, embed);
+            }
             else
-                return ctx.Member.SendMessageAsync(content, isTTS, embed);
+            {
+                if (embed is null) return ctx.Member.SendMessageAsync(content);
+                else return ctx.Member.SendMessageAsync(content, embed);
+            }
         }
     }
 }

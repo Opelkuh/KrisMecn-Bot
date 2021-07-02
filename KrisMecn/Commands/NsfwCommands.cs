@@ -1,10 +1,10 @@
-﻿using KrisMecn.Extensions;
-using KrisMecn.Helpers.Extensions;
-using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
+using KrisMecn.Extensions;
+using KrisMecn.Helpers.Extensions;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace KrisMecn.Commands
 {
@@ -22,7 +22,7 @@ namespace KrisMecn.Commands
             Description("Gets a random image from rule34.xxx with the specified tags"),
             RequireNsfw()
         ]
-        public Task Rule34(CommandContext ctx, [RemainingText] string tags) 
+        public Task Rule34(CommandContext ctx, [RemainingText] string tags)
             => GetRandomImage(ctx, BooruSite.Rule34, tags, _r34Color);
 
         [
@@ -107,7 +107,7 @@ namespace KrisMecn.Commands
         {
             var sb = new StringBuilder();
 
-            foreach(string s in data)
+            foreach (string s in data)
             {
                 sb.AppendFormat("`{0}` ", s);
             }

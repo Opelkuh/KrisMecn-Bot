@@ -1,14 +1,15 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.CommandsNext.Attributes;
+using DSharpPlus.CommandsNext.Exceptions;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Interactivity;
+using DSharpPlus.Interactivity.Extensions;
 using DSharpPlus.VoiceNext;
+using KrisMecn.Attributes;
 using KrisMecn.Entities;
 using KrisMecn.Extensions;
-using KrisMecn.Attributes;
 using System;
 using System.IO;
 using System.Reflection;
@@ -54,13 +55,13 @@ namespace KrisMecn
             _commands = _client.UseCommandsNext(new CommandsNextConfiguration()
             {
                 StringPrefixes = new string[] { Config.Prefix },
-                CaseSensitive = false,        
+                CaseSensitive = false,
                 EnableDms = true,
                 EnableDefaultHelp = false,
             });
 
             // setup interactivity
-            _interactivity =_client.UseInteractivity(new InteractivityConfiguration()
+            _interactivity = _client.UseInteractivity(new InteractivityConfiguration()
             {
                 Timeout = TimeSpan.FromSeconds(30)
             });
@@ -94,14 +95,14 @@ namespace KrisMecn
             _commands.RegisterCommands(Assembly.GetExecutingAssembly());
         }
 
-        private Task Client_Ready(ReadyEventArgs e)
+        private Task Client_Ready(DiscordClient c, ReadyEventArgs e)
         {
             Logger.Info("Client is ready to process events.");
 
             return Task.CompletedTask;
         }
 
-        private Task Client_SocketOpened()
+        private Task Client_SocketOpened(DiscordClient c, SocketEventArgs e)
         {
             StartTimes.SocketStart = DateTime.Now;
 
@@ -110,14 +111,14 @@ namespace KrisMecn
             return Task.CompletedTask;
         }
 
-        private Task Client_SocketClosed(SocketCloseEventArgs e)
+        private Task Client_SocketClosed(DiscordClient c, SocketCloseEventArgs e)
         {
             Logger.Info($"Gateway connection closed. Code: {e.CloseCode}");
 
             return Task.CompletedTask;
         }
 
-        private Task Client_SocketErrored(SocketErrorEventArgs e)
+        private Task Client_SocketErrored(DiscordClient c, SocketErrorEventArgs e)
         {
             Logger.Error("Gateway connection error", e.Exception);
 
@@ -125,14 +126,14 @@ namespace KrisMecn
         }
 
 
-        private Task Client_ClientError(ClientErrorEventArgs e)
+        private Task Client_ClientError(DiscordClient c, ClientErrorEventArgs e)
         {
             Logger.Error($"Exception occured: {e.Exception.GetType()}: {e.Exception.Message}");
 
             return Task.CompletedTask;
         }
 
-        private async Task Commands_CommandExecuted(CommandExecutionEventArgs e)
+        private async Task Commands_CommandExecuted(CommandsNextExtension s, CommandExecutionEventArgs e)
         {
             try
             {
@@ -145,7 +146,7 @@ namespace KrisMecn
             Logger.Info($"{e.Context.User.Username} successfully executed '{e.Command.QualifiedName}'");
         }
 
-        private async Task Commands_CommandErrored(CommandErrorEventArgs e)
+        private async Task Commands_CommandErrored(CommandsNextExtension s, CommandErrorEventArgs e)
         {
             // log error
             Logger.Error(
@@ -193,7 +194,7 @@ namespace KrisMecn
 
             // start connection
             await _client.ConnectAsync(activity, Config.Activity.Status);
-            
+
             await Task.Delay(-1);
         }
     }

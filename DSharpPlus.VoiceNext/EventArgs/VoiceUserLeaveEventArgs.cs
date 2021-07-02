@@ -22,7 +22,5 @@ namespace DSharpPlus.VoiceNext.EventArgs
         /// Connection which raised the event
         /// </summary>
         public VoiceNextConnection Connection { get; internal set; }
-
-        internal VoiceUserLeaveEventArgs(DiscordClient discord) : base(discord) { }
     }
 }
