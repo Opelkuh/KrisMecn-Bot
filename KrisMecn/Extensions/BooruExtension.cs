@@ -46,7 +46,7 @@ namespace KrisMecn.Extensions
 
             try
             {
-                return await client.GetRandomImageAsync(tags);
+                return await client.GetRandomPostAsync(tags);
             }
             catch (Exception e)
             {

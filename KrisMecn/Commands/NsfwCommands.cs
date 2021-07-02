@@ -3,6 +3,7 @@ using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 using KrisMecn.Extensions;
 using KrisMecn.Helpers.Extensions;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -92,18 +93,18 @@ namespace KrisMecn.Commands
 
             // build response embed
             eb
-                .AddField("URL", img.fileUrl.AbsoluteUri)
-                .AddField("Tags", JoinTags(img.tags))
-                .WithImageUrl(img.fileUrl.AbsoluteUri);
+                .AddField("URL", img.FileUrl.AbsoluteUri)
+                .AddField("Tags", JoinTags(img.Tags))
+                .WithImageUrl(img.FileUrl.AbsoluteUri);
 
             // add optional fields
-            if (img.score.HasValue) eb.AddField("Likes", img.score.Value.ToString(), true);
-            if (img.creation.HasValue) eb.AddField("Upload date (D.M.Y)", img.creation.Value.ToString("dd.MM.yyyy"), true);
+            if (img.Score.HasValue) eb.AddField("Likes", img.Score.Value.ToString(), true);
+            if (img.Creation.HasValue) eb.AddField("Upload date (D.M.Y)", img.Creation.Value.ToString("dd.MM.yyyy"), true);
 
             await ctx.RespondAsync(embed: eb).ConfigureAwait(false);
         }
 
-        private string JoinTags(string[] data)
+        private string JoinTags(IEnumerable<string> data)
         {
             var sb = new StringBuilder();
 

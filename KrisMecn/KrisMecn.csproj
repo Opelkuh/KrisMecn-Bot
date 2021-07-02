@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BooruSharp" Version="2.0.3" />
-    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.44.1.1869" />
+    <PackageReference Include="BooruSharp" Version="3.0.3" />
+    <PackageReference Include="Google.Apis.YouTube.v3" Version="1.52.0.2366" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
