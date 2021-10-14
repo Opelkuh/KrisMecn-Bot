@@ -11,10 +11,10 @@ namespace KrisMecn.Voice
         private ProcessStartInfo _info;
         private FfmpegArgBuilder _argBuilder;
 
-        public Converter() : this(DEFAULT_LOG_LEVEL) { }
-        public Converter(string inputPath) : this(DEFAULT_LOG_LEVEL, inputPath) { }
-        public Converter(FfmpegLogLevel logLevel) : this(logLevel, "-") { } // default to stdin input
-        public Converter(FfmpegLogLevel logLevel, string inputPath) : base("ffmpeg", "-hide_banner -h")
+        public Converter(string ffmpegBinaryPath) : this(ffmpegBinaryPath, DEFAULT_LOG_LEVEL) { }
+        public Converter(string ffmpegBinaryPath, string inputPath) : this(ffmpegBinaryPath, DEFAULT_LOG_LEVEL, inputPath) { }
+        public Converter(string ffmpegBinaryPath, FfmpegLogLevel logLevel) : this(ffmpegBinaryPath, logLevel, "-") { } // default to stdin input
+        public Converter(string ffmpegBinaryPath, FfmpegLogLevel logLevel, string inputPath) : base(ffmpegBinaryPath, "-hide_banner -h")
         {
             _argBuilder = new FfmpegArgBuilder()
                 .Input(inputPath)

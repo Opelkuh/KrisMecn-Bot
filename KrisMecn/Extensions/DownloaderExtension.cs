@@ -5,14 +5,18 @@ namespace KrisMecn.Extensions
 {
     class DownloaderExtension : BaseExtension
     {
-        public DownloaderExtension() : base()
+        private string ytdlBinaryPath; 
+        
+        public DownloaderExtension(string ytdlBinaryPath) : base()
         {
-            new Downloader().IsAvailable();
+            new Downloader(ytdlBinaryPath).IsAvailable();
+
+            this.ytdlBinaryPath = ytdlBinaryPath;
         }
 
         public Downloader GetDownloader()
         {
-            var ret = new Downloader();
+            var ret = new Downloader(this.ytdlBinaryPath);
             ret.ProcessErrorEvent += Downloader_ProcessErrorEvent;
 
             return ret;

@@ -5,14 +5,18 @@ namespace KrisMecn.Extensions
 {
     class ConverterExtension : BaseExtension
     {
-        public ConverterExtension()
+        private string ffmpegBinaryPath; 
+        
+        public ConverterExtension(string ffmpegBinaryPath)
         {
-            new Converter().IsAvailable();
+            new Converter(ffmpegBinaryPath).IsAvailable();
+
+            this.ffmpegBinaryPath = ffmpegBinaryPath;
         }
 
         public Converter GetConverter()
         {
-            var ret = new Converter();
+            var ret = new Converter(this.ffmpegBinaryPath);
             ret.ProcessErrorEvent += Converter_ProcessErrorEvent;
 
             return ret;
@@ -20,7 +24,7 @@ namespace KrisMecn.Extensions
 
         public Converter GetConverter(string filePath)
         {
-            var ret = new Converter(filePath);
+            var ret = new Converter(this.ffmpegBinaryPath, filePath);
             ret.ProcessErrorEvent += Converter_ProcessErrorEvent;
 
             return ret;

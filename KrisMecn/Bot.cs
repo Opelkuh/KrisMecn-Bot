@@ -75,9 +75,9 @@ namespace KrisMecn
             // setup custom extensions
             _client.AddExtension(new BotContextExtension(this));
             _client.AddExtension(new EmojiExtension());
-            _client.AddExtension(new DownloaderExtension());
+            _client.AddExtension(new DownloaderExtension(Config.YoutubeDlBinaryPath));
+            _client.AddExtension(new ConverterExtension(Config.FFmpegBinaryPath));
             _client.AddExtension(new BooruExtension());
-            _client.AddExtension(new ConverterExtension());
             _client.AddExtension(new SoundEffectWatcherExtension("./soundEffects"));
             _client.AddExtension(new YoutubeAPIExtension(Config.GoogleApiKey));
 

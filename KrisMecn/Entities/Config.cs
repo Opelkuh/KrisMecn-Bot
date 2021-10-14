@@ -24,6 +24,12 @@ namespace KrisMecn.Entities
 
         [JsonProperty("inviteLink")]
         public string InviteLink = "";
+        
+        [JsonProperty("youtubeDlBinaryPath")]
+        public string YoutubeDlBinaryPath = "youtube-dl";
+
+        [JsonProperty("ffmpegBinaryPath")]
+        public string FFmpegBinaryPath = "ffmpeg";
 
         public static Config LoadFromFile(string path)
         {

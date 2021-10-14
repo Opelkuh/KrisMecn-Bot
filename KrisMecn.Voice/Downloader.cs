@@ -8,7 +8,7 @@ namespace KrisMecn.Voice
     {
         public bool QuietOutput = true;
 
-        public Downloader() : base("youtube-dl", "-h") { }
+        public Downloader(string ytdlBinaryPath) : base(ytdlBinaryPath, "-h") { }
 
         public Stream Download(string url, string format = "")
         {
