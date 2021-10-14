@@ -422,10 +422,6 @@ namespace DSharpPlus.VoiceNext
                     {
                         spinWait.SpinOnce();
                     }
-
-                    var jitter = (long)((Stopwatch.GetTimestamp() - targetTime) * tickResolution);
-                    if (jitter > 20000)
-                        Console.WriteLine(jitter);
                 }
 
                 synchronizerTicks += synchronizerResolution * durationModifier;
@@ -890,7 +886,7 @@ namespace DSharpPlus.VoiceNext
 
             if (this.SenderTokenSource != null) this.SenderTokenSource.Cancel();
             this.SenderTokenSource = new CancellationTokenSource();
-            this.SenderTask = Task.Run(this.VoiceSenderTask, this.SenderToken);
+            this.SenderTask = Task.Factory.StartNew(this.VoiceSenderTask, TaskCreationOptions.LongRunning);
 
             if (this.ReceiverTokenSource != null) this.ReceiverTokenSource.Cancel();
             this.ReceiverTokenSource = new CancellationTokenSource();
