@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using Newtonsoft.Json;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace DSharpPlus.Net.Abstractions
 {
@@ -49,6 +49,12 @@ namespace DSharpPlus.Net.Abstractions
         [JsonProperty("bot_require_code_grant", NullValueHandling = NullValueHandling.Include)]
         public bool BotRequiresCodeGrant { get; set; }
 
+        [JsonProperty("terms_of_service_url", NullValueHandling = NullValueHandling.Ignore)]
+        public string TermsOfServiceUrl { get; set; }
+
+        [JsonProperty("privacy_policy_url", NullValueHandling = NullValueHandling.Ignore)]
+        public string PrivacyPolicyUrl { get; set; }
+
         // Json.NET can figure the type out
         [JsonProperty("rpc_origins", NullValueHandling = NullValueHandling.Ignore)]
         public IList<string> RpcOrigins { get; set; }
@@ -58,6 +64,9 @@ namespace DSharpPlus.Net.Abstractions
 
         [JsonProperty("team", NullValueHandling = NullValueHandling.Include)]
         public TransportTeam Team { get; set; }
+
+        [JsonProperty("flags", NullValueHandling = NullValueHandling.Ignore)]
+        public ApplicationFlags? Flags { get; set; }
 
         // These are dispatch (store) properties - can't imagine them being needed in bots
         //[JsonProperty("verify_key", NullValueHandling = NullValueHandling.Include)]

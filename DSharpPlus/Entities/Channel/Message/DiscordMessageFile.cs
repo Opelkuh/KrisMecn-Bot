@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -30,9 +30,11 @@ namespace DSharpPlus.Entities
     /// </summary>
     public class DiscordMessageFile
     {
-        internal DiscordMessageFile(string fileName, Stream stream, long? resetPositionTo)
+        internal DiscordMessageFile(string fileName, Stream stream, long? resetPositionTo, string fileType = null, string contentType = null)
         {
-            this.FileName = fileName;
+            this.FileName = fileName ?? "file";
+            this.FileType = fileType;
+            this.ContentType = contentType;
             this.Stream = stream;
             this.ResetPositionTo = resetPositionTo;
         }
@@ -46,6 +48,10 @@ namespace DSharpPlus.Entities
         /// Gets the stream of the File.
         /// </summary>
         public Stream Stream { get; internal set; }
+
+        internal string FileType { get; set; }
+
+        internal string ContentType { get; set; }
 
         /// <summary>
         /// Gets the position the File should be reset to.

@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -20,10 +20,11 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace DSharpPlus.Entities
 {
@@ -51,23 +52,43 @@ namespace DSharpPlus.Entities
         public bool Disabled { get; internal set; }
 
         /// <summary>
-        /// The minimum amount of options that can be selected. Must be greater than zero and less than or equal to <see cref="MaximumSelectedValues"/>. Defaults to one.
+        /// The minimum amount of options that can be selected. Must be less than or equal to <see cref="MaximumSelectedValues"/>. Defaults to one.
         /// </summary>
         [JsonProperty("min_values", NullValueHandling = NullValueHandling.Ignore)]
         public int? MinimumSelectedValues { get; internal set; }
 
         /// <summary>
-        /// The maximum amount of options that can be selected. Must be greater than zero and or equal to <see cref="MinimumSelectedValues"/>. Defaults to 1.
+        /// The maximum amount of options that can be selected. Must be greater than or equal to zero or <see cref="MinimumSelectedValues"/>. Defaults to one.
         /// </summary>
         [JsonProperty("max_values", NullValueHandling = NullValueHandling.Ignore)]
         public int? MaximumSelectedValues { get; internal set; }
+
+        /// <summary>
+        /// Enables this component if it was disabled before.
+        /// </summary>
+        /// <returns>The current component.</returns>
+        public DiscordSelectComponent Enable()
+        {
+            this.Disabled = false;
+            return this;
+        }
+
+        /// <summary>
+        /// Disables this component.
+        /// </summary>
+        /// <returns>The current component.</returns>
+        public DiscordSelectComponent Disable()
+        {
+            this.Disabled = true;
+            return this;
+        }
 
         internal DiscordSelectComponent()
         {
             this.Type = ComponentType.Select;
         }
 
-        public DiscordSelectComponent(string customId, string? placeholder, IEnumerable<DiscordSelectComponentOption> options, bool disabled = false, int minOptions = 1, int maxOptions = 1) : this()
+        public DiscordSelectComponent(string customId, string placeholder, IEnumerable<DiscordSelectComponentOption> options, bool disabled = false, int minOptions = 1, int maxOptions = 1) : this()
         {
             this.CustomId = customId;
             this.Options = options.ToArray();

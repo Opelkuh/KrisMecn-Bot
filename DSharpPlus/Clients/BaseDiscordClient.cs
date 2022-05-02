@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +22,6 @@
 // SOFTWARE.
 
 #pragma warning disable CS0618
-using DSharpPlus.Entities;
-using DSharpPlus.Net;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -32,6 +29,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using DSharpPlus.Entities;
+using DSharpPlus.Net;
+using Microsoft.Extensions.Logging;
 
 namespace DSharpPlus
 {
@@ -137,8 +137,10 @@ namespace DSharpPlus
                 Description = tapp.Description,
                 Summary = tapp.Summary,
                 IconHash = tapp.IconHash,
+                TermsOfServiceUrl = tapp.TermsOfServiceUrl,
+                PrivacyPolicyUrl = tapp.PrivacyPolicyUrl,
                 RpcOrigins = tapp.RpcOrigins != null ? new ReadOnlyCollection<string>(tapp.RpcOrigins) : null,
-                Flags = 0,
+                Flags = tapp.Flags,
                 RequiresCodeGrant = tapp.BotRequiresCodeGrant,
                 IsPublic = tapp.IsPublicBot,
                 CoverImageHash = null
@@ -193,7 +195,7 @@ namespace DSharpPlus
             if (this.CurrentUser == null)
             {
                 this.CurrentUser = await this.ApiClient.GetCurrentUserAsync().ConfigureAwait(false);
-                this.UserCache.AddOrUpdate(this.CurrentUser.Id, this.CurrentUser, (id, xu) => this.CurrentUser);
+                this.UpdateUserCache(this.CurrentUser);
             }
 
             if (this.Configuration.TokenType == TokenType.Bot && this.CurrentApplication == null)
@@ -246,6 +248,14 @@ namespace DSharpPlus
             user = new DiscordUser { Id = user_id, Discord = this };
             return false;
         }
+
+        // This previously set properties on the old user and re-injected into the cache.
+        // That's terrible. Instead, insert the new reference and let the old one get GC'd.
+        // End-users are more likely to be holding a reference to the new object via an event or w/e
+        // anyways.
+        // Furthermore, setting properties requires keeping track of where we update cache and updating repeat code.
+        internal DiscordUser UpdateUserCache(DiscordUser newUser)
+            => this.UserCache.AddOrUpdate(newUser.Id, newUser, (_, _) => newUser);
 
         /// <summary>
         /// Disposes this client.

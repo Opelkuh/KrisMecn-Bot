@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace DSharpPlus.Entities
 {
@@ -51,10 +51,30 @@ namespace DSharpPlus.Entities
         public DiscordInteractionResolvedCollection Resolved { get; internal set; }
 
         /// <summary>
-        /// The Id of the component that invoked this interaction, if applicable.
+        /// The Id of the component that invoked this interaction, or the Id of the modal the interaction was spawned from.
         /// </summary>
         [JsonProperty("custom_id", NullValueHandling = NullValueHandling.Ignore)]
         public string CustomId { get; internal set; }
+
+        /// <summary>
+        /// The title of the modal, if applicable.
+        /// </summary>
+        [JsonProperty("title", NullValueHandling = NullValueHandling.Ignore)]
+        public string Title { get; internal set; }
+
+        /// <summary>
+        /// Components on this interaction. Only applies to modal interactions.
+        /// </summary>
+        public IReadOnlyList<DiscordActionRowComponent> Components => this._components;
+
+        [JsonProperty("components", NullValueHandling = NullValueHandling.Ignore)]
+        internal List<DiscordActionRowComponent> _components;
+
+        /// <summary>
+        /// The Id of the target. Applicable for context menus.
+        /// </summary>
+        [JsonProperty("target_id", NullValueHandling = NullValueHandling.Ignore)]
+        internal ulong? Target { get; set; }
 
         /// <summary>
         /// The type of component that invoked this interaction, if applicable.
@@ -64,5 +84,8 @@ namespace DSharpPlus.Entities
 
         [JsonProperty("values", NullValueHandling = NullValueHandling.Ignore)]
         public string[] Values { get; internal set; } = Array.Empty<string>();
+
+        [JsonProperty("type", NullValueHandling = NullValueHandling.Ignore)]
+        public ApplicationCommandType Type { get; internal set; }
     }
 }

@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DSharpPlus.Entities
@@ -62,6 +63,8 @@ namespace DSharpPlus.Entities
                 this._embeds.Add(value);
             }
         }
+
+        public DiscordMessageSticker Sticker { get; set; }
 
         /// <summary>
         /// Gets the Embeds to be sent.
@@ -116,6 +119,17 @@ namespace DSharpPlus.Entities
         public DiscordMessageBuilder WithContent(string content)
         {
             this.Content = content;
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a sticker to the message. Sticker must be from current guild.
+        /// </summary>
+        /// <param name="sticker">The sticker to add.</param>
+        /// <returns>The current builder to be chained.</returns>
+        public DiscordMessageBuilder WithSticker(DiscordMessageSticker sticker)
+        {
+            this.Sticker = sticker;
             return this;
         }
 
@@ -188,6 +202,9 @@ namespace DSharpPlus.Entities
         /// <returns>The current builder to be chained.</returns>
         public DiscordMessageBuilder WithEmbed(DiscordEmbed embed)
         {
+            if (embed == null)
+                return this;
+
             this.Embed = embed;
             return this;
         }
@@ -199,6 +216,8 @@ namespace DSharpPlus.Entities
         /// <returns>The current builder to be chained.</returns>
         public DiscordMessageBuilder AddEmbed(DiscordEmbed embed)
         {
+            if (embed == null)
+                return this; //Providing null embeds will produce a 400 response from Discord.//
             this._embeds.Add(embed);
             return this;
         }
@@ -299,7 +318,7 @@ namespace DSharpPlus.Entities
         /// <returns>The current builder to be chained.</returns>
         public DiscordMessageBuilder WithFiles(Dictionary<string, Stream> files, bool resetStreamPosition = false)
         {
-            if (this.Files.Count + files.Count >= 10)
+            if (this.Files.Count + files.Count > 10)
                 throw new ArgumentException("Cannot send more than 10 files with a single message.");
 
             foreach (var file in files)
@@ -323,11 +342,18 @@ namespace DSharpPlus.Entities
         /// <param name="mention">If we should mention the user in the reply.</param>
         /// <param name="failOnInvalidReply">Whether sending a reply that references an invalid message should be </param>
         /// <returns>The current builder to be chained.</returns>
-        public DiscordMessageBuilder WithReply(ulong messageId, bool mention = false, bool failOnInvalidReply = false)
+        public DiscordMessageBuilder WithReply(ulong? messageId, bool mention = false, bool failOnInvalidReply = false)
         {
             this.ReplyId = messageId;
             this.MentionOnReply = mention;
             this.FailOnInvalidReply = failOnInvalidReply;
+
+            if (mention)
+            {
+                this.Mentions ??= new List<IMention>();
+                this.Mentions.Add(new RepliedUserMention());
+            }
+
             return this;
         }
 
@@ -341,10 +367,17 @@ namespace DSharpPlus.Entities
 
         /// <summary>
         /// Sends the modified message.
+        /// <para>Note: Message replies cannot be modified. To clear the reply, simply pass <see langword="null"/> to <see cref="WithReply"/>.</para>
         /// </summary>
         /// <param name="msg">The original Message to modify.</param>
         /// <returns>The current builder to be chained.</returns>
         public Task<DiscordMessage> ModifyAsync(DiscordMessage msg) => msg.ModifyAsync(this);
+
+        /// <summary>
+        /// Clears all message components on this builder.
+        /// </summary>
+        public void ClearComponents()
+            => this._components.Clear();
 
         /// <summary>
         /// Allows for clearing the Message Builder so that it can be used again to send a new message.
@@ -370,22 +403,14 @@ namespace DSharpPlus.Entities
             if (this._embeds.Count > 10)
                 throw new ArgumentException("A message can only have up to 10 embeds.");
 
-            if (isModify)
-            {
-                if (this.ReplyId.HasValue)
-                    throw new ArgumentException("You cannot change the ReplyID when modifying a message");
-            }
-            else
-            {
-                if (this.Files?.Count == 0 && string.IsNullOrEmpty(this.Content) && (!this.Embeds?.Any() ?? true))
-                    throw new ArgumentException("You must specify content, an embed, or at least one file.");
+            if (this.Files?.Count == 0 && string.IsNullOrEmpty(this.Content) && (!this.Embeds?.Any() ?? true) && this.Sticker is null)
+                throw new ArgumentException("You must specify content, an embed, a sticker, or at least one file.");
 
-                if (this.Components.Count > 5)
-                    throw new InvalidOperationException("You can only have 5 action rows per message.");
+            if (this.Components.Count > 5)
+                throw new InvalidOperationException("You can only have 5 action rows per message.");
 
-                if (this.Components.Any(c => c.Components.Count > 5))
-                    throw new InvalidOperationException("Action rows can only have 5 components");
-            }
+            if (this.Components.Any(c => c.Components.Count > 5))
+                throw new InvalidOperationException("Action rows can only have 5 components");
         }
     }
 }

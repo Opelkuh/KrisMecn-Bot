@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,11 +21,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using DSharpPlus.Entities;
 
 namespace DSharpPlus.Net
 {
@@ -42,14 +42,17 @@ namespace DSharpPlus.Net
         /// <summary>
         /// Gets the dictionary of files attached to this request.
         /// </summary>
-        public IReadOnlyDictionary<string, Stream> Files { get; }
+        public IReadOnlyCollection<DiscordMessageFile> Files { get; }
+
+        internal bool _removeFileCount;
 
         internal MultipartWebRequest(BaseDiscordClient client, RateLimitBucket bucket, Uri url, RestRequestMethod method, string route, IReadOnlyDictionary<string, string> headers = null, IReadOnlyDictionary<string, string> values = null,
-            IReadOnlyCollection<DiscordMessageFile> files = null, double? ratelimit_wait_override = null)
+            IReadOnlyCollection<DiscordMessageFile> files = null, double? ratelimit_wait_override = null, bool removeFileCount = false)
             : base(client, bucket, url, method, route, headers, ratelimit_wait_override)
         {
             this.Values = values;
-            this.Files = files.ToDictionary(x => x.FileName, x => x.Stream);
+            this.Files = files;
+            this._removeFileCount = removeFileCount;
         }
     }
 }

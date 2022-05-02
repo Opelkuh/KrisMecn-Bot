@@ -34,5 +34,9 @@ namespace KrisMecn.Extensions
         {
             Logger.Error("ffmpeg Error", e.Data);
         }
+
+        protected override void Setup(DiscordClient client)
+        {
+        }
     }
 }

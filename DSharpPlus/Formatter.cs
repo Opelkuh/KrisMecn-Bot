@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,10 +21,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using DSharpPlus.Entities;
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
+using DSharpPlus.Entities;
 
 namespace DSharpPlus
 {
@@ -35,6 +36,21 @@ namespace DSharpPlus
     {
         private static Regex MdSanitizeRegex { get; } = new Regex(@"([`\*_~<>\[\]\(\)""@\!\&#:\|])", RegexOptions.ECMAScript);
         private static Regex MdStripRegex { get; } = new Regex(@"([`\*_~\[\]\(\)""\|]|<@\!?\d+>|<#\d+>|<@\&\d+>|<:[a-zA-Z0-9_\-]:\d+>)", RegexOptions.ECMAScript);
+
+        private const string AnsiEscapeStarter = "\u001b[";
+
+        /// <summary>
+        /// Colorizes text based using ANSI escape codes. Escape codes are only properly rendered in code blocks. Resets are inserted automatically.
+        /// </summary>
+        /// <param name="text">The text to colorize.</param>
+        /// <param name="styles"></param>
+        /// <returns></returns>
+        public static string Colorize(string text, params AnsiColor[] styles)
+        {
+            var joined = styles.Select(s => ((int)s).ToString()).Aggregate((a, b) => $"{a};{b}");
+
+            return $"{AnsiEscapeStarter}{joined}m{text}{AnsiEscapeStarter}{(int)AnsiColor.Reset}m";
+        }
 
         /// <summary>
         /// Creates a block of code.
@@ -58,18 +74,27 @@ namespace DSharpPlus
         /// </summary>
         /// <param name="time">The time from now.</param>
         /// <param name="format">The format to render the timestamp in. Defaults to relative.</param>
-        /// <returns>A formatted timestamp relative to now.</returns>
+        /// <returns>A formatted timestamp.</returns>
         public static string Timestamp(TimeSpan time, TimestampFormat format = TimestampFormat.RelativeTime)
-            => $"<t:{(DateTimeOffset.UtcNow + time).ToUnixTimeSeconds()}:{(char)format}>";
+            => Timestamp(DateTimeOffset.UtcNow + time, format);
 
         /// <summary>
         /// Creates a rendered timestamp.
         /// </summary>
         /// <param name="time">The time from now.</param>
         /// <param name="format">The format to render the timestamp in. Defaults to relative.</param>
-        /// <returns>A formatted timestamp relative to now.</returns>
+        /// <returns>A formatted timestamp.</returns>
         public static string Timestamp(DateTime time, TimestampFormat format = TimestampFormat.RelativeTime)
-            => Timestamp(time.ToUniversalTime() - DateTime.UtcNow, format);
+            => Timestamp(new DateTimeOffset(time.ToUniversalTime()), format);
+
+        /// <summary>
+        /// Creates a rendered timestamp.
+        /// </summary>
+        /// <param name="time">Timestamp to format.</param>
+        /// <param name="format">The format to render the timestamp in. Defaults to relative.</param>
+        /// <returns>A formatted timestamp.</returns>
+        public static string Timestamp(DateTimeOffset time, TimestampFormat format = TimestampFormat.RelativeTime)
+            => $"<t:{time.ToUnixTimeSeconds()}:{(char)format}>";
 
         /// <summary>
         /// Creates bold text.

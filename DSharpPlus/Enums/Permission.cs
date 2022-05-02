@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@ namespace DSharpPlus
 {
     public static class PermissionMethods
     {
-        internal static Permissions FULL_PERMS { get; } = (Permissions)128849018879L;
+        internal static Permissions FULL_PERMS { get; } = (Permissions)1099511627775L;
 
         /// <summary>
         /// Calculates whether this permission set contains the given permission.
@@ -92,7 +92,7 @@ namespace DSharpPlus
         /// Indicates all permissions are granted
         /// </summary>
         [PermissionString("All permissions")]
-        All = 128849018879,
+        All = 1099511627775,
 
         /// <summary>
         /// Allows creation of instant channel invites.
@@ -155,7 +155,7 @@ namespace DSharpPlus
         AccessChannels = 0x0000000000000400,
 
         /// <summary>
-        /// Allows sending messages.
+        /// Allows sending messages (does not allow sending messages in threads).
         /// </summary>
         [PermissionString("Send messages")]
         SendMessages = 0x0000000000000800,
@@ -197,9 +197,9 @@ namespace DSharpPlus
         MentionEveryone = 0x0000000000020000,
 
         /// <summary>
-        /// Allows using emojis from external servers, such as twitch or nitro emojis.
+        /// Allows using emojis or stickers from external servers, such as twitch or nitro emojis.
         /// </summary>
-        [PermissionString("Use external emojis")]
+        [PermissionString("Use external emojis and stickers")]
         UseExternalEmojis = 0x0000000000040000,
 
         /// <summary>
@@ -263,28 +263,41 @@ namespace DSharpPlus
         ManageWebhooks = 0x0000000020000000,
 
         /// <summary>
-        /// Allows managing guild emoji.
+        /// Allows managing guild emoji and stickers.
         /// </summary>
-        [PermissionString("Manage emoji")]
+        [PermissionString("Manage emoji and stickers")]
         ManageEmojis = 0x0000000040000000,
 
         /// <summary>
         /// Allows the user to go live.
         /// </summary>
         [PermissionString("Allow stream")]
-        Stream = 0x0000000000000200,
+        Stream  = 0x0000000000000200,
 
         /// <summary>
         /// Allows the user to use slash commands.
         /// </summary>
+        [Obsolete("Replaced by UseApplicationCommands", false)]
         [PermissionString("Use slash commands")]
         UseSlashCommands = 0x0000000080000000,
+
+        /// <summary>
+        /// Allows the user to use application commands.
+        /// </summary>
+        [PermissionString("Use application commands")]
+        UseApplicationCommands = 0x0000000080000000,
 
         /// <summary>
         /// Allows for requesting to speak in stage channels.
         /// </summary>
         [PermissionString("Request to speak")]
         RequestToSpeak = 0x0000000100000000,
+
+        /// <summary>
+        /// Allows for managing scheduled guild events.
+        /// </summary>
+        [PermissionString("Manage Scheduled Events")]
+        ManageEvents = 0x0000000200000000,
 
         /// <summary>
         /// Allows for deleting and archiving threads, and viewing all private threads.
@@ -295,14 +308,52 @@ namespace DSharpPlus
         /// <summary>
         /// Allows for creating and participating in threads.
         /// </summary>
+        [Obsolete("Replaced by CreatePublicThreads and SendMessagesInThreads", false)]
         [PermissionString("Use Public Threads")]
         UsePublicThreads = 0x0000000800000000,
 
         /// <summary>
         /// Allows for creating and participating in private threads.
         /// </summary>
+        [Obsolete("Replaced by CreatePrivateThreads and SendMessagesInThreads", false)]
         [PermissionString("Use Private Threads")]
-        UsePrivateThreads = 0x0000001000000000
+        UsePrivateThreads = 0x0000001000000000,
+
+        /// <summary>
+        /// Allows for creating public threads.
+        /// </summary>
+        [PermissionString("Create Public Threads")]
+        CreatePublicThreads = 0x0000000800000000,
+
+        /// <summary>
+        /// Allows for creating private threads.
+        /// </summary>
+        [PermissionString("Create Private Threads")]
+        CreatePrivateThreads = 0x0000001000000000,
+
+        /// <summary>
+        /// Allows the usage of custom stickers from other servers.
+        /// </summary>
+        [PermissionString("Use external Stickers")]
+        UseExternalStickers = 0x0000002000000000,
+
+        /// <summary>
+        /// Allows for sending messages in threads.
+        /// </summary>
+        [PermissionString("Send messages in Threads")]
+        SendMessagesInThreads = 0x0000004000000000,
+
+        /// <summary>
+        /// Allows for launching activities (applications with the `EMBEDDED` flag) in a voice channel.
+        /// </summary>
+        [PermissionString("Start Embedded Activities")]
+        StartEmbeddedActivities = 0x0000008000000000,
+
+        /// <summary>
+        /// Allows for moderating (Timeout) members in a guild.
+        /// </summary>
+        [PermissionString("Moderate Members")]
+        ModerateMembers = 0x0000010000000000
     }
 
     /// <summary>

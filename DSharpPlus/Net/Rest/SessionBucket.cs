@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using Newtonsoft.Json;
 using System;
+using Newtonsoft.Json;
 
 namespace DSharpPlus.Net
 {
@@ -57,7 +57,7 @@ namespace DSharpPlus.Net
         public int MaxConcurrency { get; internal set; }
 
         [JsonProperty("reset_after")]
-        internal int resetAfter { get; set; }
+        internal int ResetAfterInternal { get; set; }
 
 #pragma warning disable CS0114
         public override string ToString()

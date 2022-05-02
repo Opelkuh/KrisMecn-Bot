@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using Newtonsoft.Json;
 using System;
+using Newtonsoft.Json;
 
 namespace DSharpPlus.Entities
 {
@@ -38,7 +38,7 @@ namespace DSharpPlus.Entities
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets the value of this choice parameter. This will either be a type of <see cref="int"/> / <see cref="long"/> or <see cref="string"/>.
+        /// Gets the value of this choice parameter. This will either be a type of <see cref="int"/> / <see cref="long"/>, <see cref="double"/> or <see cref="string"/>.
         /// </summary>
         [JsonProperty("value")]
         public object Value { get; set; }
@@ -50,13 +50,13 @@ namespace DSharpPlus.Entities
         /// <param name="value">The value of the parameter choice.</param>
         public DiscordApplicationCommandOptionChoice(string name, object value)
         {
-            if (!(value is string || value is long || value is int))
-                throw new InvalidOperationException($"Only {typeof(string)}, {typeof(long)} or {typeof(int)} types may be passed to a command option choice.");
+            if (!(value is string || value is long || value is int || value is double))
+                throw new InvalidOperationException($"Only {typeof(string)}, {typeof(long)}, {typeof(double)} or {typeof(int)} types may be passed to a command option choice.");
 
             if (name.Length > 100)
-                throw new ArgumentException("Slash command choice name cannot exceed 100 characters.", nameof(name));
+                throw new ArgumentException("Application command choice name cannot exceed 100 characters.", nameof(name));
             if (value is string val && val.Length > 100)
-                throw new ArgumentException("Slash command choice value cannot exceed 100 characters.", nameof(value));
+                throw new ArgumentException("Application command choice value cannot exceed 100 characters.", nameof(value));
 
             this.Name = name;
             this.Value = value;

@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,8 +28,14 @@ namespace DSharpPlus.Entities
     /// <summary>
     /// Represents a Discord integration account.
     /// </summary>
-    public class DiscordIntegrationAccount : SnowflakeObject
+    public class DiscordIntegrationAccount
     {
+        /// <summary>
+        /// Gets the ID of the account.
+        /// </summary>
+        [JsonProperty("id", NullValueHandling = NullValueHandling.Ignore)]
+        public string Id { get; internal set; }
+
         /// <summary>
         /// Gets the name of the account.
         /// </summary>

@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace DSharpPlus.Entities
 {
@@ -67,7 +68,7 @@ namespace DSharpPlus.Entities
         /// </summary>
         [JsonIgnore]
         public DiscordChannel Channel
-            => (this.Discord as DiscordClient).InternalGetCachedChannel(this.ChannelId);
+            => (this.Discord as DiscordClient).InternalGetCachedChannel(this.ChannelId) ?? (DiscordChannel)(this.Discord as DiscordClient).InternalGetCachedThread(this.ChannelId) ?? (this.Guild == null ? new DiscordDmChannel { Id = this.ChannelId, Type = ChannelType.Private, Discord = this.Discord, Recipients = new DiscordUser[] { this.User }} : null);
 
         /// <summary>
         /// Gets the user that invoked this interaction.
@@ -102,6 +103,18 @@ namespace DSharpPlus.Entities
         internal DiscordMessage Message { get; set; }
 
         /// <summary>
+        /// Gets the locale of the user that invoked this interaction.
+        /// </summary>
+        [JsonProperty("locale")]
+        public string? Locale { get; internal set; }
+
+        /// <summary>
+        /// Gets the guild's preferred locale, if invoked in a guild.
+        /// </summary>
+        [JsonProperty("guild_locale")]
+        public string? GuildLocale { get; internal set; }
+
+        /// <summary>
         /// Creates a response to this interaction.
         /// </summary>
         /// <param name="type">The type of the response.</param>
@@ -120,12 +133,13 @@ namespace DSharpPlus.Entities
         /// Edits the original interaction response.
         /// </summary>
         /// <param name="builder">The webhook builder.</param>
+        /// <param name="attachments">Attached files to keep.</param>
         /// <returns>The <see cref="DiscordMessage"/> edited.</returns>
-        public async Task<DiscordMessage> EditOriginalResponseAsync(DiscordWebhookBuilder builder)
+        public async Task<DiscordMessage> EditOriginalResponseAsync(DiscordWebhookBuilder builder, IEnumerable<DiscordAttachment> attachments = default)
         {
             builder.Validate(isInteractionResponse: true);
 
-            return await this.Discord.ApiClient.EditOriginalInteractionResponseAsync(this.Discord.CurrentApplication.Id, this.Token, builder);
+            return await this.Discord.ApiClient.EditOriginalInteractionResponseAsync(this.Discord.CurrentApplication.Id, this.Token, builder, attachments).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -143,20 +157,28 @@ namespace DSharpPlus.Entities
         {
             builder.Validate();
 
-            return await this.Discord.ApiClient.CreateFollowupMessageAsync(this.Discord.CurrentApplication.Id, this.Token, builder);
+            return await this.Discord.ApiClient.CreateFollowupMessageAsync(this.Discord.CurrentApplication.Id, this.Token, builder).ConfigureAwait(false);
         }
+
+        /// <summary>
+        /// Gets a follow up message.
+        /// </summary>
+        /// <param name="messageId">The id of the follow up message.</param>
+        public Task<DiscordMessage> GetFollowupMessageAsync(ulong messageId) =>
+            this.Discord.ApiClient.GetFollowupMessageAsync(this.Discord.CurrentApplication.Id, this.Token, messageId);
 
         /// <summary>
         /// Edits a follow up message.
         /// </summary>
         /// <param name="messageId">The id of the follow up message.</param>
         /// <param name="builder">The webhook builder.</param>
+        /// <param name="attachments">Attached files to keep.</param>
         /// <returns>The <see cref="DiscordMessage"/> edited.</returns>
-        public async Task<DiscordMessage> EditFollowupMessageAsync(ulong messageId, DiscordWebhookBuilder builder)
+        public async Task<DiscordMessage> EditFollowupMessageAsync(ulong messageId, DiscordWebhookBuilder builder, IEnumerable<DiscordAttachment> attachments = default)
         {
             builder.Validate(isFollowup: true);
 
-            return await this.Discord.ApiClient.EditFollowupMessageAsync(this.Discord.CurrentApplication.Id, this.Token, messageId, builder);
+            return await this.Discord.ApiClient.EditFollowupMessageAsync(this.Discord.CurrentApplication.Id, this.Token, messageId, builder, attachments).ConfigureAwait(false);
         }
 
         /// <summary>

@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,15 +21,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using DSharpPlus.Entities;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using DSharpPlus.Entities;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace DSharpPlus.Net.Serialization
 {
@@ -60,12 +60,12 @@ namespace DSharpPlus.Net.Serialization
             var constructor = objectType.GetTypeInfo().DeclaredConstructors
                 .FirstOrDefault(e => !e.IsStatic && e.GetParameters().Length == 0);
 
-            var dict = constructor.Invoke(new object[] { });
+            var dict = constructor.Invoke(new object[] {});
 
             // the default name of an indexer is "Item"
             var properties = objectType.GetTypeInfo().GetDeclaredProperty("Item");
 
-            var entries = (IEnumerable)serializer.Deserialize(reader, objectType.GenericTypeArguments[1].MakeArrayType());
+            var entries = (IEnumerable) serializer.Deserialize(reader, objectType.GenericTypeArguments[1].MakeArrayType());
             foreach (var entry in entries)
             {
                 properties.SetValue(dict, entry, new object[]

@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -62,6 +62,21 @@ namespace DSharpPlus
         /// Indicates that this is a store channel.
         /// </summary>
         Store = 6,
+
+        /// <summary>
+        /// Indicates that this is a thread within a news channel.
+        /// </summary>
+        NewsThread = 10,
+        
+        /// <summary>
+        /// Indicates that this is a public thread within a channel.
+        /// </summary>
+        PublicThread = 11,
+
+        /// <summary>
+        /// Indicates that this is a private thread within a channel.
+        /// </summary>
+        PrivateThread = 12,
 
         /// <summary>
         /// Indicates that this is a stage channel.

@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
+using DSharpPlus.Entities;
 
 namespace DSharpPlus.Net.Models
 {
@@ -38,10 +38,11 @@ namespace DSharpPlus.Net.Models
             set
             {
                 if (value.Value.Length > 32)
-                    throw new ArgumentException("Slash command name cannot exceed 32 characters.", nameof(value));
+                    throw new ArgumentException("Application command name cannot exceed 32 characters.", nameof(value));
                 this._name = value;
             }
         }
+
         private Optional<string> _name;
 
         /// <summary>
@@ -53,10 +54,11 @@ namespace DSharpPlus.Net.Models
             set
             {
                 if (value.Value.Length > 100)
-                    throw new ArgumentException("Slash command description cannot exceed 100 characters.", nameof(value));
+                    throw new ArgumentException("Application command description cannot exceed 100 characters.", nameof(value));
                 this._description = value;
             }
         }
+
         private Optional<string> _description;
 
         /// <summary>
@@ -68,5 +70,15 @@ namespace DSharpPlus.Net.Models
         /// Sets whether the command is enabled by default when the application is added to a guild.
         /// </summary>
         public Optional<bool?> DefaultPermission { internal get; set; }
+
+        /// <summary>
+        /// Sets whether the command can be invoked in DMs.
+        /// </summary>
+        public Optional<bool> AllowDMUsage { internal get; set; }
+
+        /// <summary>
+        /// Sets the requisite permissions for the command.
+        /// </summary>
+        public Optional<Permissions?> DefaultMemberPermissions { internal get; set; }
     }
 }

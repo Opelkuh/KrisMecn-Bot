@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using Newtonsoft.Json;
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace DSharpPlus.Entities
 {
@@ -59,10 +60,23 @@ namespace DSharpPlus.Entities
         public DiscordUser TargetUser { get; internal set; }
 
         /// <summary>
+        /// Gets the partial embedded application to open for a voice channel.
+        /// </summary>
+        [JsonProperty("target_application", NullValueHandling = NullValueHandling.Ignore)]
+        public DiscordApplication TargetApplication { get; internal set; }
+
+        /// <summary>
         /// Gets the type of user who the invite is for.
         /// </summary>
+        [Obsolete("This property is depreciated and will be removed in a future version. Please use TargetType instead.", false)]
         [JsonProperty("target_user_type", NullValueHandling = NullValueHandling.Ignore)]
         public TargetUserType? TargetUserType { get; internal set; }
+
+        /// <summary>
+        /// Gets the target application for this invite.
+        /// </summary>
+        [JsonProperty("target_type", NullValueHandling = NullValueHandling.Ignore)]
+        public InviteTargetType? TargetType { get; internal set; }
 
         /// <summary>
         /// Gets the approximate guild online member count for the invite.
@@ -117,6 +131,22 @@ namespace DSharpPlus.Entities
         /// </summary>
         [JsonProperty("revoked", NullValueHandling = NullValueHandling.Ignore)]
         public bool IsRevoked { get; internal set; }
+
+        /// <summary>
+        /// Gets the expiration date of this invite.
+        /// </summary>
+        [JsonIgnore]
+        public DateTimeOffset? ExpiresAt
+            => !string.IsNullOrWhiteSpace(this.ExpiresAtRaw) && DateTimeOffset.TryParse(this.ExpiresAtRaw, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dto) ? dto : null;
+
+        [JsonProperty("expires_at", NullValueHandling = NullValueHandling.Ignore)]
+        internal string ExpiresAtRaw { get; set; }
+
+        /// <summary>
+        /// Gets stage instance data for this invite if it is for a stage instance channel.
+        /// </summary>
+        [JsonProperty("stage_instance")]
+        public DiscordStageInvite StageInstance { get; internal set; }
 
         internal DiscordInvite() { }
 

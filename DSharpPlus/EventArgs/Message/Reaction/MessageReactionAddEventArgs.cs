@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -46,15 +46,15 @@ namespace DSharpPlus.EventArgs
             => this.Message.Channel;
 
         /// <summary>
+        /// Gets the guild in which the reaction was added.
+        /// </summary>
+        public DiscordGuild Guild { get; internal set; }
+
+        /// <summary>
         /// Gets the user who created the reaction.
         /// <para>This can be cast to a <see cref="DiscordMember"/> if the reaction was in a guild.</para>
         /// </summary>
         public DiscordUser User { get; internal set; }
-
-        /// <summary>
-        /// Gets the guild in which the reaction was added.
-        /// </summary>
-        public DiscordGuild Guild { get; internal set; }
 
         /// <summary>
         /// Gets the emoji used for this reaction.

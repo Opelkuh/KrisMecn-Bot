@@ -55,6 +55,10 @@ namespace KrisMecn.Extensions
                 return null;
             }
         }
+
+        protected override void Setup(DiscordClient client)
+        {
+        }
     }
 
     enum BooruSite

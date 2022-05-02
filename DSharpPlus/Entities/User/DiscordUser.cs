@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,12 +21,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using DSharpPlus.Net.Abstractions;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using DSharpPlus.Net;
+using DSharpPlus.Net.Abstractions;
+using Newtonsoft.Json;
 
 namespace DSharpPlus.Entities
 {
@@ -42,6 +43,8 @@ namespace DSharpPlus.Entities
             this.Username = transport.Username;
             this.Discriminator = transport.Discriminator;
             this.AvatarHash = transport.AvatarHash;
+            this._bannerColor = transport.BannerColor;
+            this.BannerHash = transport.BannerHash;
             this.IsBot = transport.IsBot;
             this.MfaEnabled = transport.MfaEnabled;
             this.Verified = transport.Verified;
@@ -67,6 +70,28 @@ namespace DSharpPlus.Entities
         [JsonIgnore]
         internal int DiscriminatorInt
             => int.Parse(this.Discriminator, NumberStyles.Integer, CultureInfo.InvariantCulture);
+
+        /// <summary>
+        /// Gets the user's banner color, if set. Mutually exclusive with <see cref="BannerHash"/>.
+        /// </summary>
+        public virtual DiscordColor? BannerColor
+            => !this._bannerColor.HasValue ? null : new DiscordColor(this._bannerColor.Value);
+
+        [JsonProperty("accent_color")]
+        internal int? _bannerColor;
+
+        /// <summary>
+        /// Gets the user's banner url.
+        /// </summary>
+        [JsonIgnore]
+        public string BannerUrl
+            => string.IsNullOrEmpty(this.BannerHash) ? null : $"https://cdn.discordapp.com/banners/{this.Id}/{this.BannerHash}.{(this.BannerHash.StartsWith("a") ? "gif" : "png")}?size=4096";
+
+        /// <summary>
+        /// Gets the user's profile banner hash. Mutually exclusive with <see cref="BannerColor"/>.
+        /// </summary>
+        [JsonProperty("banner", NullValueHandling = NullValueHandling.Ignore)]
+        public virtual string BannerHash { get; internal set; }
 
         /// <summary>
         /// Gets the user's avatar hash.
@@ -176,51 +201,50 @@ namespace DSharpPlus.Entities
         /// </summary>
         [JsonIgnore]
         public DiscordPresence Presence
-        {
-            get
-            {
-                return this.Discord is DiscordClient dc ? dc.Presences.TryGetValue(this.Id, out var presence) ? presence : null : null;
-            }
-        }
+            => this.Discord is DiscordClient dc ? dc.Presences.TryGetValue(this.Id, out var presence) ? presence : null : null;
 
         /// <summary>
         /// Gets the user's avatar URL, in requested format and size.
         /// </summary>
-        /// <param name="fmt">Format of the avatar to get.</param>
-        /// <param name="size">Maximum size of the avatar. Must be a power of two, minimum 16, maximum 2048.</param>
-        /// <returns>URL of the user's avatar.</returns>
-        public string GetAvatarUrl(ImageFormat fmt, ushort size = 1024)
+        /// <param name="imageFormat">The image format of the avatar to get.</param>
+        /// <param name="imageSize">The maximum size of the avatar. Must be a power of two, minimum 16, maximum 4096.</param>
+        /// <returns>The URL of the user's avatar.</returns>
+        public string GetAvatarUrl(ImageFormat imageFormat, ushort imageSize = 1024)
         {
-            if (fmt == ImageFormat.Unknown)
-                throw new ArgumentException("You must specify valid image format.", nameof(fmt));
+            if (imageFormat == ImageFormat.Unknown)
+                throw new ArgumentException("You must specify valid image format.", nameof(imageFormat));
 
-            if (size < 16 || size > 2048)
-                throw new ArgumentOutOfRangeException(nameof(size));
+            // Makes sure the image size is in between Discord's allowed range.
+            if (imageSize < 16 || imageSize > 4096)
+                throw new ArgumentOutOfRangeException("Image Size is not in between 16 and 4096: " + nameof(imageSize));
 
-            var log = Math.Log(size, 2);
-            if (log < 4 || log > 11 || log % 1 != 0)
-                throw new ArgumentOutOfRangeException(nameof(size));
+            // Checks to see if the image size is not a power of two.
+            if (!(imageSize is not 0 && (imageSize & (imageSize - 1)) is 0))
+                throw new ArgumentOutOfRangeException("Image size is not a power of two: " + nameof(imageSize));
 
-            var sfmt = "";
-            sfmt = fmt switch
+            // Get the string varients of the method parameters to use in the urls.
+            var stringImageFormat = imageFormat switch
             {
                 ImageFormat.Gif => "gif",
                 ImageFormat.Jpeg => "jpg",
                 ImageFormat.Png => "png",
                 ImageFormat.WebP => "webp",
                 ImageFormat.Auto => !string.IsNullOrWhiteSpace(this.AvatarHash) ? (this.AvatarHash.StartsWith("a_") ? "gif" : "png") : "png",
-                _ => throw new ArgumentOutOfRangeException(nameof(fmt)),
+                _ => throw new ArgumentOutOfRangeException(nameof(imageFormat)),
             };
-            var ssize = size.ToString(CultureInfo.InvariantCulture);
+            var stringImageSize = imageSize.ToString(CultureInfo.InvariantCulture);
+
+            // If the avatar hash is set, get their avatar. If it isn't set, grab the default avatar calculated from their discriminator.
             if (!string.IsNullOrWhiteSpace(this.AvatarHash))
             {
-                var id = this.Id.ToString(CultureInfo.InvariantCulture);
-                return $"https://cdn.discordapp.com/avatars/{id}/{this.AvatarHash}.{sfmt}?size={ssize}";
+                var userId = this.Id.ToString(CultureInfo.InvariantCulture);
+                return $"https://cdn.discordapp.com{Endpoints.AVATARS}/{userId}/{this.AvatarHash}.{stringImageFormat}?size={stringImageSize}";
             }
             else
             {
-                var type = (this.DiscriminatorInt % 5).ToString(CultureInfo.InvariantCulture);
-                return $"https://cdn.discordapp.com/embed/avatars/{type}.{sfmt}?size={ssize}";
+                // https://discord.com/developers/docs/reference#image-formatting-cdn-endpoints: In the case of the Default User Avatar endpoint, the value for `user_discriminator` in the path should be the user's discriminator `modulo 5—Test#1337` would be `1337 % 5`, which evaluates to 2.
+                var defaultAvatarType = (this.DiscriminatorInt % 5).ToString(CultureInfo.InvariantCulture);
+                return $"https://cdn.discordapp.com/embed{Endpoints.AVATARS}/{defaultAvatarType}.{stringImageFormat}?size={stringImageSize}";
             }
         }
 

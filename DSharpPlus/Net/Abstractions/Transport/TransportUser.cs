@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -39,6 +39,12 @@ namespace DSharpPlus.Net.Abstractions
         [JsonProperty("avatar", NullValueHandling = NullValueHandling.Ignore)]
         public string AvatarHash { get; internal set; }
 
+        [JsonProperty("banner", NullValueHandling = NullValueHandling.Ignore)]
+        public string BannerHash { get; internal set; }
+
+        [JsonProperty("accent_color")]
+        public int? BannerColor { get; internal set; }
+
         [JsonProperty("bot", NullValueHandling = NullValueHandling.Ignore)]
         public bool IsBot { get; internal set; }
 
@@ -71,6 +77,8 @@ namespace DSharpPlus.Net.Abstractions
             this.Username = other.Username;
             this.Discriminator = other.Discriminator;
             this.AvatarHash = other.AvatarHash;
+            this.BannerHash = other.BannerHash;
+            this.BannerColor = other.BannerColor;
             this.IsBot = other.IsBot;
             this.MfaEnabled = other.MfaEnabled;
             this.Verified = other.Verified;

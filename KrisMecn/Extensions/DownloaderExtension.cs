@@ -26,5 +26,9 @@ namespace KrisMecn.Extensions
         {
             Logger.Error("Youtube-DL Error", e.Data);
         }
+
+        protected override void Setup(DiscordClient client)
+        {
+        }
     }
 }

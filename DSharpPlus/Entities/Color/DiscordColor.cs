@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ namespace DSharpPlus.Entities
     /// </summary>
     public partial struct DiscordColor
     {
-        private static readonly char[] HexAlphabet = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+        private static readonly char[] _hexAlphabet = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
         /// <summary>
         /// Gets the integer representation of this color.
@@ -113,7 +113,7 @@ namespace DSharpPlus.Entities
             else if (color.Length == 7)
                 color = color.Substring(1);
 
-            if (color.Any(xc => !HexAlphabet.Contains(xc)))
+            if (color.Any(xc => !_hexAlphabet.Contains(xc)))
                 throw new ArgumentException(nameof(color), "Colors must consist of hexadecimal characters only.");
 
             this.Value = int.Parse(color, NumberStyles.HexNumber, CultureInfo.InvariantCulture);

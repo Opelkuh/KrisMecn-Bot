@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,11 +21,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace DSharpPlus.Entities
 {
@@ -39,6 +39,12 @@ namespace DSharpPlus.Entities
         /// </summary>
         [JsonProperty("application_id")]
         public ulong ApplicationId { get; internal set; }
+
+        /// <summary>
+        /// Gets the type of this application command.
+        /// </summary>
+        [JsonProperty("type")]
+        public ApplicationCommandType Type { get; internal set; }
 
         /// <summary>
         /// Gets the name of this command.
@@ -65,27 +71,69 @@ namespace DSharpPlus.Entities
         public bool? DefaultPermission { get; internal set; }
 
         /// <summary>
+        /// Whether this command can be invoked in DMs.
+        /// </summary>
+        [JsonProperty("dm_permissions")]
+        public bool? AllowDMUsage { get; internal set; }
+
+        /// <summary>
+        /// What permissions this command requires to be invoked.
+        /// </summary>
+        [JsonProperty("default_member_permissions")]
+        public Permissions? DefaultMemberPermissions { get; internal set; }
+
+
+        /// <summary>
+        /// Gets the autoincrementing version number for this command.
+        /// </summary>
+        [JsonProperty("version")]
+        public ulong Version { get; internal set; }
+
+        [JsonProperty("name_localizations")]
+        public IReadOnlyDictionary<string, string> NameLocalizations { get; internal set; }
+
+        [JsonProperty("description_localizations")]
+        public IReadOnlyDictionary<string, string> DescriptionLocalizations { get; internal set; }
+
+        /// <summary>
         /// Creates a new instance of a <see cref="DiscordApplicationCommand"/>.
         /// </summary>
         /// <param name="name">The name of the command.</param>
         /// <param name="description">The description of the command.</param>
         /// <param name="options">Optional parameters for this command.</param>
         /// <param name="defaultPermission">Whether the command is enabled by default when the application is added to a guild.</param>
-        public DiscordApplicationCommand(string name, string description, IEnumerable<DiscordApplicationCommandOption> options = null, bool? defaultPermission = null)
+        /// <param name="type">The type of the application command</param>
+        public DiscordApplicationCommand(string name, string description, IEnumerable<DiscordApplicationCommandOption> options = null, bool? defaultPermission = null, ApplicationCommandType type = ApplicationCommandType.SlashCommand, IReadOnlyDictionary<string, string> name_localizations = null, IReadOnlyDictionary<string, string> description_localizations = null, bool? allowDMUsage = null, Permissions? defaultMemberPermissions = null)
         {
-            if (!Utilities.IsValidSlashCommandName(name))
-                throw new ArgumentException("Invalid slash command name specified. It must be below 32 characters and not contain any whitespace.", nameof(name));
-            if (name.Any(ch => char.IsUpper(ch)))
-                throw new ArgumentException("Slash command name cannot have any upper case characters.", nameof(name));
-            if (description.Length > 100)
-                throw new ArgumentException("Slash command description cannot exceed 100 characters.", nameof(description));
+            if (type is ApplicationCommandType.SlashCommand)
+            {
+                if (!Utilities.IsValidSlashCommandName(name))
+                    throw new ArgumentException("Invalid slash command name specified. It must be below 32 characters and not contain any whitespace.", nameof(name));
+                if (name.Any(ch => char.IsUpper(ch)))
+                    throw new ArgumentException("Slash command name cannot have any upper case characters.", nameof(name));
+                if (description.Length > 100)
+                    throw new ArgumentException("Slash command description cannot exceed 100 characters.", nameof(description));
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(description))
+                    throw new ArgumentException("Context menus do not support descriptions.");
+
+                if (options?.Any() ?? false)
+                    throw new ArgumentException("Context menus do not support options.");
+            }
 
             var optionsList = options != null ? new ReadOnlyCollection<DiscordApplicationCommandOption>(options.ToList()) : null;
 
+            this.Type = type;
             this.Name = name;
             this.Description = description;
             this.Options = optionsList;
             this.DefaultPermission = defaultPermission;
+            this.NameLocalizations = name_localizations;
+            this.DescriptionLocalizations = description_localizations;
+            this.AllowDMUsage = allowDMUsage;
+            this.DefaultMemberPermissions = defaultMemberPermissions;
         }
 
         /// <summary>
@@ -97,7 +145,7 @@ namespace DSharpPlus.Entities
             => this.Id == other.Id;
 
         /// <summary>
-        /// Determines if two <see cref="DiscordApplicationCommand"/> objects are equal. 
+        /// Determines if two <see cref="DiscordApplicationCommand"/> objects are equal.
         /// </summary>
         /// <param name="e1">The first command object.</param>
         /// <param name="e2">The second command object.</param>
@@ -106,7 +154,7 @@ namespace DSharpPlus.Entities
             => e1.Equals(e2);
 
         /// <summary>
-        /// Determines if two <see cref="DiscordApplicationCommand"/> objects are not equal. 
+        /// Determines if two <see cref="DiscordApplicationCommand"/> objects are not equal.
         /// </summary>
         /// <param name="e1">The first command object.</param>
         /// <param name="e2">The second command object.</param>

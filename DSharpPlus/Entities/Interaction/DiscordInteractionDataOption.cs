@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,13 +21,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Globalization;
+using Newtonsoft.Json;
 
 namespace DSharpPlus.Entities
 {
     /// <summary>
-    /// Represents parameters for interaction commands. 
+    /// Represents parameters for interaction commands.
     /// </summary>
     public sealed class DiscordInteractionDataOption
     {
@@ -43,30 +44,33 @@ namespace DSharpPlus.Entities
         [JsonProperty("type")]
         public ApplicationCommandOptionType Type { get; internal set; }
 
+        /// <summary>
+        /// If this is an autocomplete option: Whether this option is currently active.
+        /// </summary>
+        [JsonProperty("focused")]
+        public bool Focused { get; internal set; }
+
         [JsonProperty("value")]
-        internal string _value { get; set; }
+        internal string InternalValue { get; set; }
 
         /// <summary>
-        /// Gets the value of this interaction parameter. 
-        /// <para>This can be cast to a <see langword="long"/>, <see langword="bool"></see>, <see langword="string"></see> or <see langword="ulong"/> depending on the <see cref="Type"/></para>
+        /// Gets the value of this interaction parameter.
+        /// <para>This can be cast to a <see langword="long"/>, <see langword="bool"></see>, <see langword="string"></see>, <see langword="double"></see> or <see langword="ulong"/> depending on the <see cref="Type"/></para>
         /// </summary>
         [JsonIgnore]
-        public object Value
+        public object Value => this.Type switch
         {
-            get
-            {
-                return this.Type switch
-                {
-                    ApplicationCommandOptionType.Boolean => bool.Parse(this._value),
-                    ApplicationCommandOptionType.Integer => long.Parse(this._value),
-                    ApplicationCommandOptionType.String => this._value,
-                    ApplicationCommandOptionType.Channel => ulong.Parse(this._value),
-                    ApplicationCommandOptionType.User => ulong.Parse(this._value),
-                    ApplicationCommandOptionType.Role => ulong.Parse(this._value),
-                    _ => this._value,
-                };
-            }
-        }
+            ApplicationCommandOptionType.Boolean => bool.Parse(this.InternalValue),
+            ApplicationCommandOptionType.Integer => long.Parse(this.InternalValue),
+            ApplicationCommandOptionType.String => this.InternalValue,
+            ApplicationCommandOptionType.Channel => ulong.Parse(this.InternalValue),
+            ApplicationCommandOptionType.User => ulong.Parse(this.InternalValue),
+            ApplicationCommandOptionType.Role => ulong.Parse(this.InternalValue),
+            ApplicationCommandOptionType.Mentionable => ulong.Parse(this.InternalValue),
+            ApplicationCommandOptionType.Number => double.Parse(this.InternalValue, CultureInfo.InvariantCulture),
+            ApplicationCommandOptionType.Attachment => ulong.Parse(this.InternalValue, CultureInfo.InvariantCulture),
+            _ => this.InternalValue,
+        };
 
         /// <summary>
         /// Gets the additional parameters if this parameter is a subcommand.

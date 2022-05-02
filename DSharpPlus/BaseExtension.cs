@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -37,9 +37,6 @@ namespace DSharpPlus
         /// Initializes this extension for given <see cref="DiscordClient"/> instance.
         /// </summary>
         /// <param name="client">Discord client to initialize for.</param>
-        protected internal virtual void Setup(DiscordClient client)
-        {
-            Client = client;
-        }
+        protected internal abstract void Setup(DiscordClient client);
     }
 }

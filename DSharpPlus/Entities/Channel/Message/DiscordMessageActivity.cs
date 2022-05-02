@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ namespace DSharpPlus.Entities
         /// Gets the activity type.
         /// </summary>
         [JsonProperty("type")]
-        public int Type { get; internal set; }
+        public MessageActivityType Type { get; internal set; }
 
         /// <summary>
         /// Gets the party id of the activity.

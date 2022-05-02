@@ -7,5 +7,9 @@ namespace KrisMecn.Extensions
         public Bot BotInstance { get; }
 
         public BotContextExtension(Bot bot) => BotInstance = bot;
+        
+        protected override void Setup(DiscordClient client)
+        {
+        }
     }
 }

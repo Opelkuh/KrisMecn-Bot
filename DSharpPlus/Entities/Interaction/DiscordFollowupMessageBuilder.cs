@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -273,11 +273,17 @@ namespace DSharpPlus.Entities
         /// </summary>
         /// <param name="ephemeral">Ephemeral.</param>
         /// <returns>The builder to chain calls with.</returns>
-        public DiscordFollowupMessageBuilder AsEphemeral(bool ephemeral)
+        public DiscordFollowupMessageBuilder AsEphemeral(bool ephemeral = true)
         {
             this.IsEphemeral = ephemeral;
             return this;
         }
+
+        /// <summary>
+        /// Clears all message components on this builder.
+        /// </summary>
+        public void ClearComponents()
+            => this._components.Clear();
 
         /// <summary>
         /// Allows for clearing the Followup Message builder so that it can be used again to send a new message.

@@ -32,5 +32,9 @@ namespace KrisMecn.Extensions
 
             return res.Items;
         }
+
+        protected override void Setup(DiscordClient client)
+        {
+        }
     }
 }

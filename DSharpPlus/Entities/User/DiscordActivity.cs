@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,10 +21,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
 using DSharpPlus.Net.Abstractions;
 using Newtonsoft.Json;
-using System;
-using System.Globalization;
 
 namespace DSharpPlus.Entities
 {
@@ -181,8 +182,10 @@ namespace DSharpPlus.Entities
             this.Name = other.Name;
             this.ActivityType = other.ActivityType;
             this.StreamUrl = other.StreamUrl;
-            this.RichPresence = new DiscordRichPresence(other.RichPresence);
-            this.CustomStatus = new DiscordCustomStatus(other.CustomStatus);
+            if(other.RichPresence != null)
+                this.RichPresence = new DiscordRichPresence(other.RichPresence);
+            if(other.CustomStatus != null)
+                this.CustomStatus = new DiscordCustomStatus(other.CustomStatus);
         }
 
         internal void UpdateWith(TransportActivity rawActivity)
@@ -322,6 +325,11 @@ namespace DSharpPlus.Entities
         /// </summary>
         public string SpectateSecret { get; internal set; }
 
+        /// <summary>
+        /// Gets the buttons for the rich presence.
+        /// </summary>
+        public IReadOnlyList<string> Buttons { get; internal set; }
+
         internal DiscordRichPresence() { }
 
         internal DiscordRichPresence(TransportActivity rawGame)
@@ -347,6 +355,7 @@ namespace DSharpPlus.Entities
             this.JoinSecret = other.JoinSecret;
             this.MatchSecret = other.MatchSecret;
             this.SpectateSecret = other.SpectateSecret;
+            this.Buttons = other.Buttons;
         }
 
         internal void UpdateWith(TransportActivity rawGame)
@@ -368,6 +377,7 @@ namespace DSharpPlus.Entities
             this.JoinSecret = rawGame?.Secrets?.Join;
             this.MatchSecret = rawGame?.Secrets?.Match;
             this.SpectateSecret = rawGame?.Secrets?.Spectate;
+            this.Buttons = rawGame?.Buttons;
 
             var lid = rawGame?.Assets?.LargeImage;
             if (lid != null)

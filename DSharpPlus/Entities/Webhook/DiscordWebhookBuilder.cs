@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -64,6 +64,11 @@ namespace DSharpPlus.Entities
         }
 
         private string _content;
+
+        /// <summary>
+        /// Id of the thread to send the webhook request to.
+        /// </summary>
+        public ulong? ThreadId { get; set; }
 
         /// <summary>
         /// Embeds to send on this webhook request.
@@ -191,7 +196,9 @@ namespace DSharpPlus.Entities
         /// <param name="embed">Embed to add.</param>
         public DiscordWebhookBuilder AddEmbed(DiscordEmbed embed)
         {
-            this._embeds.Add(embed);
+            if (embed != null)
+                this._embeds.Add(embed);
+
             return this;
         }
 
@@ -256,7 +263,7 @@ namespace DSharpPlus.Entities
         /// <param name="resetStreamPosition">Tells the API Client to reset the stream position to what it was after the file is sent.</param>
         public DiscordWebhookBuilder AddFiles(Dictionary<string, Stream> files, bool resetStreamPosition = false)
         {
-            if (this.Files.Count() + files.Count() >= 10)
+            if (this.Files.Count() + files.Count() > 10)
                 throw new ArgumentException("Cannot send more than 10 files with a single message.");
 
             foreach (var file in files)
@@ -295,6 +302,16 @@ namespace DSharpPlus.Entities
         }
 
         /// <summary>
+        /// Sets the id of the thread to execute the webhook on.
+        /// </summary>
+        /// <param name="threadId">The id of the thread</param>
+        public DiscordWebhookBuilder WithThreadId(ulong? threadId)
+        {
+            this.ThreadId = threadId;
+            return this;
+        }
+
+        /// <summary>
         /// Executes a webhook.
         /// </summary>
         /// <param name="webhook">The webhook that should be executed.</param>
@@ -315,6 +332,12 @@ namespace DSharpPlus.Entities
         /// <param name="messageId">The id of the message to modify.</param>
         /// <returns>The modified message</returns>
         public async Task<DiscordMessage> ModifyAsync(DiscordWebhook webhook, ulong messageId) => await webhook.EditMessageAsync(messageId, this).ConfigureAwait(false);
+
+        /// <summary>
+        /// Clears all message components on this builder.
+        /// </summary>
+        public void ClearComponents()
+            => this._components.Clear();
 
         /// <summary>
         /// Allows for clearing the Webhook Builder so that it can be used again to send a new message.

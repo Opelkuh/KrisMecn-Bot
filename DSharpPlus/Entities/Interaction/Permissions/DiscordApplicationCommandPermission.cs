@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,7 @@ using Newtonsoft.Json;
 namespace DSharpPlus.Entities
 {
     /// <summary>
-    /// Represents a permission for a slash command.
+    /// Represents a permission for a application command.
     /// </summary>
     public class DiscordApplicationCommandPermission
     {
@@ -49,7 +49,7 @@ namespace DSharpPlus.Entities
         public bool Permission { get; internal set; }
 
         /// <summary>
-        /// Represents a permission for a slash command.
+        /// Represents a permission for a application command.
         /// </summary>
         /// <param name="role">The role to contruct the permission for.</param>
         /// <param name="permission">Whether the command should be enabled for the role.</param>
@@ -61,7 +61,7 @@ namespace DSharpPlus.Entities
         }
 
         /// <summary>
-        /// Represents a permission for a slash command.
+        /// Represents a permission for a application command.
         /// </summary>
         /// <param name="member">The member to construct the permission for.</param>
         /// <param name="permission">Whether the command should be enabled for the role.</param>

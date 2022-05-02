@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using DSharpPlus.Entities;
+using System.Collections.Generic;
 using System.IO;
+using DSharpPlus.Entities;
 
 namespace DSharpPlus.Net.Models
 {
@@ -102,6 +103,31 @@ namespace DSharpPlus.Net.Models
         /// The new guild preferred locale.
         /// </summary>
         public Optional<string> PreferredLocale { internal get; set; }
+
+        /// <summary>
+        /// The new description of the guild
+        /// </summary>
+        public Optional<string> Description { get; set; }
+
+        /// <summary>
+        /// The new discorvery splash image of the guild
+        /// </summary>
+        public Optional<string> DiscoverySplash { get; set; }
+
+        /// <summary>
+        /// A list of <see href="https://discord.com/developers/docs/resources/guild#guild-object-guild-features">guild features</see>
+        /// </summary>
+        public Optional<IEnumerable<string>> Features { get; set; }
+
+        /// <summary>
+        /// The new banner of the guild
+        /// </summary>
+        public Optional<Stream> Banner { get; set; }
+
+        /// <summary>
+        /// The new system channel flags for the guild
+        /// </summary>
+        public Optional<SystemChannelFlags> SystemChannelFlags { get; set; }
 
         internal GuildEditModel()
         {

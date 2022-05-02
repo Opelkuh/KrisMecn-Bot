@@ -54,7 +54,7 @@ namespace KrisMecn
             // setup commands
             _commands = _client.UseCommandsNext(new CommandsNextConfiguration()
             {
-                StringPrefixes = new string[] { Config.Prefix },
+                StringPrefixes = new [] { Config.Prefix },
                 CaseSensitive = false,
                 EnableDms = true,
                 EnableDefaultHelp = false,

@@ -20,46 +20,56 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-using DSharpPlus.Entities;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace DSharpPlus.EventArgs
 {
-
-    /// <summary>
-    /// Represents arguments for <see cref="DiscordClient.ComponentInteractionCreated"/>.
-    /// </summary>
-    public class ComponentInteractionCreateEventArgs : InteractionCreateEventArgs
+    public class ApplicationCommandPermissionsUpdatedEventArgs : DiscordEventArgs
     {
         /// <summary>
-        /// The Id of the component that was interacted with.
+        /// The Id of the guild the command was updated for.
         /// </summary>
-        public string Id => this.Interaction.Data.CustomId;
+        [JsonProperty("guild_id")]
+        public ulong GuildId { get; internal set; }
 
         /// <summary>
-        /// The user that invoked this interaction.
+        /// The Id of the command that was updated.
         /// </summary>
-        public DiscordUser User => this.Interaction.User;
+        [JsonProperty("id")]
+        public ulong CommandId { get; internal set; }
 
         /// <summary>
-        /// The guild this interaction was invoked on, if any.
+        /// The Id of the application the command was updated for.
         /// </summary>
-        public DiscordGuild Guild => this.Channel.Guild;
+        [JsonProperty("application_id")]
+        public ulong ApplicationId { get; internal set; }
 
         /// <summary>
-        /// The channel this interaction was invoked in.
+        /// The new permissions for the command.
         /// </summary>
-        public DiscordChannel Channel => this.Interaction.Channel;
+        [JsonProperty("permissions")]
+        public IReadOnlyList<ApplicationCommandPermissionUpdate> NewPermissions { get; internal set; }
+    }
+
+    public class ApplicationCommandPermissionUpdate
+    {
+        /// <summary>
+        /// The Id of the entity this permission is for.
+        /// </summary>
+        [JsonProperty("id")]
+        public ulong Id { get; internal set; }
 
         /// <summary>
-        /// The value(s) selected. Only applicable to SelectMenu components.
+        /// Whether the role/user/channel [or anyone in the channel/with the role] is allowed to use the command.
         /// </summary>
-        public string[] Values => this.Interaction.Data.Values;
+        [JsonProperty("permission")]
+        public bool Allow { get; internal set; }
 
         /// <summary>
-        /// The message this interaction is attached to.
+        ///
         /// </summary>
-        public DiscordMessage Message { get; internal set; }
-
-        internal ComponentInteractionCreateEventArgs() { }
+        [JsonProperty("type")]
+        public ApplicationCommandPermissionType Type { get; internal set; }
     }
 }

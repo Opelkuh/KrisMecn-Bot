@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,11 +21,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System;
+using System.Threading.Tasks;
+using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using Emzi0767.Utilities;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
 
 namespace DSharpPlus
 {
@@ -92,6 +93,16 @@ namespace DSharpPlus
             remove => this._heartbeated.Unregister(value);
         }
         private AsyncEvent<DiscordClient, HeartbeatEventArgs> _heartbeated;
+
+        /// <summary>
+        /// Fired on heartbeat attempt cancellation due to too many failed heartbeats.
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, ZombiedEventArgs> Zombied
+        {
+            add => this._zombied.Register(value);
+            remove => this._zombied.Unregister(value);
+        }
+        private AsyncEvent<DiscordClient, ZombiedEventArgs> _zombied;
 
         #endregion
 
@@ -221,7 +232,7 @@ namespace DSharpPlus
         private AsyncEvent<DiscordClient, GuildDownloadCompletedEventArgs> _guildDownloadCompleted;
 
         /// <summary>
-        /// Fired when a guilds emojis get updated
+        /// Fired when a guild's emojis get updated
         /// For this Event you need the <see cref="DiscordIntents.GuildEmojis"/> intent specified in <seealso cref="DiscordConfiguration.Intents"/>
         /// </summary>
         public event AsyncEventHandler<DiscordClient, GuildEmojisUpdateEventArgs> GuildEmojisUpdated
@@ -230,6 +241,17 @@ namespace DSharpPlus
             remove => this._guildEmojisUpdated.Unregister(value);
         }
         private AsyncEvent<DiscordClient, GuildEmojisUpdateEventArgs> _guildEmojisUpdated;
+
+        /// <summary>
+        /// Fired when a guild's stickers get updated
+        /// For this Event you need the <see cref="DiscordIntents.GuildEmojis"/> intent specified in <seealso cref="DiscordConfiguration.Intents"/>
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, GuildStickersUpdateEventArgs> GuildStickersUpdated
+        {
+            add => this._guildStickersUpdated.Register(value);
+            remove => this._guildStickersUpdated.Unregister(value);
+        }
+        private AsyncEvent<DiscordClient, GuildStickersUpdateEventArgs> _guildStickersUpdated;
 
         /// <summary>
         /// Fired when a guild integration is updated.
@@ -542,11 +564,82 @@ namespace DSharpPlus
 
         #endregion
 
+        #region Thread
+
+        /// <summary>
+        /// Fired when a thread is created.
+        /// For this Event you need the <see cref="DiscordIntents.Guilds"/> intent specified in <seealso cref="DiscordConfiguration.Intents"/>
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, ThreadCreateEventArgs> ThreadCreated
+        {
+            add => this._threadCreated.Register(value);
+            remove => this._threadCreated.Unregister(value);
+        }
+        private AsyncEvent<DiscordClient, ThreadCreateEventArgs> _threadCreated;
+
+        /// <summary>
+        /// Fired when a thread is updated.
+        /// For this Event you need the <see cref="DiscordIntents.Guilds"/> intent specified in <seealso cref="DiscordConfiguration.Intents"/>
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, ThreadUpdateEventArgs> ThreadUpdated
+        {
+            add => this._threadUpdated.Register(value);
+            remove => this._threadUpdated.Unregister(value);
+        }
+        private AsyncEvent<DiscordClient, ThreadUpdateEventArgs> _threadUpdated;
+
+        /// <summary>
+        /// Fired when a thread is deleted.
+        /// For this Event you need the <see cref="DiscordIntents.Guilds"/> intent specified in <seealso cref="DiscordConfiguration.Intents"/>
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, ThreadDeleteEventArgs> ThreadDeleted
+        {
+            add => this._threadDeleted.Register(value);
+            remove => this._threadDeleted.Unregister(value);
+        }
+        private AsyncEvent<DiscordClient, ThreadDeleteEventArgs> _threadDeleted;
+
+        /// <summary>
+        /// Fired when the current member gains access to a channel(s).
+        /// For this Event you need the <see cref="DiscordIntents.Guilds"/> intent specified in <seealso cref="DiscordConfiguration.Intents"/>
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, ThreadListSyncEventArgs> ThreadListSynced
+        {
+            add => this._threadListSynced.Register(value);
+            remove => this._threadListSynced.Unregister(value);
+        }
+        private AsyncEvent<DiscordClient, ThreadListSyncEventArgs> _threadListSynced;
+
+        /// <summary>
+        /// Fired when a thread member is updated.
+        /// For this Event you need the <see cref="DiscordIntents.Guilds"/> intent specified in <seealso cref="DiscordConfiguration.Intents"/>
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, ThreadMemberUpdateEventArgs> ThreadMemberUpdated
+        {
+            add => this._threadMemberUpdated.Register(value);
+            remove => this._threadMemberUpdated.Unregister(value);
+        }
+        private AsyncEvent<DiscordClient, ThreadMemberUpdateEventArgs> _threadMemberUpdated;
+
+        /// <summary>
+        /// Fired when the thread members are updated.
+        /// For this Event you need the <see cref="DiscordIntents.GuildMembers"/> or <see cref="DiscordIntents.Guilds"/> intent specified in <seealso cref="DiscordConfiguration.Intents"/>
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, ThreadMembersUpdateEventArgs> ThreadMembersUpdated
+        {
+            add => this._threadMembersUpdated.Register(value);
+            remove => this._threadMembersUpdated.Unregister(value);
+        }
+        private AsyncEvent<DiscordClient, ThreadMembersUpdateEventArgs> _threadMembersUpdated;
+
+        #endregion
+
         #region Application
 
         /// <summary>
         /// Fired when a new application command is registered.
         /// </summary>
+        [Obsolete("This event has been removed by discord and does not fire anymore.", false)]
         public event AsyncEventHandler<DiscordClient, ApplicationCommandEventArgs> ApplicationCommandCreated
         {
             add => this._applicationCommandCreated.Register(value);
@@ -557,6 +650,7 @@ namespace DSharpPlus
         /// <summary>
         /// Fired when an application command is updated.
         /// </summary>
+        [Obsolete("This event has been removed by discord and does not fire anymore.", false)]
         public event AsyncEventHandler<DiscordClient, ApplicationCommandEventArgs> ApplicationCommandUpdated
         {
             add => this._applicationCommandUpdated.Register(value);
@@ -567,12 +661,81 @@ namespace DSharpPlus
         /// <summary>
         /// Fired when an application command is deleted.
         /// </summary>
+        [Obsolete("This event has been removed by discord and does not fire anymore.", false)]
         public event AsyncEventHandler<DiscordClient, ApplicationCommandEventArgs> ApplicationCommandDeleted
         {
             add => this._applicationCommandDeleted.Register(value);
             remove => this._applicationCommandDeleted.Unregister(value);
         }
         private AsyncEvent<DiscordClient, ApplicationCommandEventArgs> _applicationCommandDeleted;
+
+        #endregion
+
+        #region Integration
+
+        /// <summary>
+        /// Fired when an integration is created.
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, IntegrationCreateEventArgs> IntegrationCreated
+        {
+            add => this._integrationCreated.Register(value);
+            remove => this._integrationCreated.Unregister(value);
+        }
+        private AsyncEvent<DiscordClient, IntegrationCreateEventArgs> _integrationCreated;
+
+        /// <summary>
+        /// Fired when an integration is updated.
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, IntegrationUpdateEventArgs> IntegrationUpdated
+        {
+            add => this._integrationUpdated.Register(value);
+            remove => this._integrationUpdated.Unregister(value);
+        }
+        private AsyncEvent<DiscordClient, IntegrationUpdateEventArgs> _integrationUpdated;
+
+        /// <summary>
+        /// Fired when an integration is deleted.
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, IntegrationDeleteEventArgs> IntegrationDeleted
+        {
+            add => this._integrationDeleted.Register(value);
+            remove => this._integrationDeleted.Unregister(value);
+        }
+        private AsyncEvent<DiscordClient, IntegrationDeleteEventArgs> _integrationDeleted;
+
+        #endregion
+
+        #region Stage Instance
+
+        /// <summary>
+        /// Fired when a stage instance is created.
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, StageInstanceCreateEventArgs> StageInstanceCreated
+        {
+            add => this._stageInstanceCreated.Register(value);
+            remove => this._stageInstanceCreated.Unregister(value);
+        }
+        private AsyncEvent<DiscordClient, StageInstanceCreateEventArgs> _stageInstanceCreated;
+
+        /// <summary>
+        /// Fired when a stage instance is updated.
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, StageInstanceUpdateEventArgs> StageInstanceUpdated
+        {
+            add => this._stageInstanceUpdated.Register(value);
+            remove => this._stageInstanceUpdated.Unregister(value);
+        }
+        private AsyncEvent<DiscordClient, StageInstanceUpdateEventArgs> _stageInstanceUpdated;
+
+        /// <summary>
+        /// Fired when a stage instance is deleted.
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, StageInstanceDeleteEventArgs> StageInstanceDeleted
+        {
+            add => this._stageInstanceDeleted.Register(value);
+            remove => this._stageInstanceDeleted.Unregister(value);
+        }
+        private AsyncEvent<DiscordClient, StageInstanceDeleteEventArgs> _stageInstanceDeleted;
 
         #endregion
 
@@ -597,6 +760,27 @@ namespace DSharpPlus
             remove => this._componentInteractionCreated.Unregister(value);
         }
         private AsyncEvent<DiscordClient, ComponentInteractionCreateEventArgs> _componentInteractionCreated;
+
+        /// <summary>
+        /// Fired when a modal is submitted. If a modal is closed, this event will not be fired.
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, ModalSubmitEventArgs> ModalSubmitted
+        {
+            add => this._modalSubmitted.Register(value);
+            remove => this._modalSubmitted.Unregister(value);
+        }
+        private AsyncEvent<DiscordClient, ModalSubmitEventArgs> _modalSubmitted;
+
+        /// <summary>
+        /// Fired when a user uses a context menu.
+        /// </summary>
+        public event AsyncEventHandler<DiscordClient, ContextMenuInteractionCreateEventArgs> ContextMenuInteractionCreated
+        {
+            add => this._contextMenuInteractionCreated.Register(value);
+            remove => this._contextMenuInteractionCreated.Unregister(value);
+        }
+
+        private AsyncEvent<DiscordClient, ContextMenuInteractionCreateEventArgs> _contextMenuInteractionCreated;
 
         /// <summary>
         /// Fired when a user starts typing in a channel.
@@ -651,12 +835,12 @@ namespace DSharpPlus
                 return;
             }
 
-            this.Logger.LogError(LoggerEvents.EventHandlerException, ex, "Event handler exception for event {0} thrown from {1} (defined in {2})", asyncEvent.Name, handler.Method, handler.Method.DeclaringType);
+            this.Logger.LogError(LoggerEvents.EventHandlerException, ex, "Event handler exception for event {Event} thrown from {Method} (defined in {DeclaringType})", asyncEvent.Name, handler.Method, handler.Method.DeclaringType);
             this._clientErrored.InvokeAsync(sender, new ClientErrorEventArgs { EventName = asyncEvent.Name, Exception = ex }).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         private void Goof<TArgs>(AsyncEvent<DiscordClient, TArgs> asyncEvent, Exception ex, AsyncEventHandler<DiscordClient, TArgs> handler, DiscordClient sender, TArgs eventArgs)
-            where TArgs : AsyncEventArgs => this.Logger.LogCritical(LoggerEvents.EventHandlerException, ex, "Exception event handler {0} (defined in {1}) threw an exception", handler.Method, handler.Method.DeclaringType);
+            where TArgs : AsyncEventArgs => this.Logger.LogCritical(LoggerEvents.EventHandlerException, ex, "Exception event handler {Method} (defined in {DeclaringType}) threw an exception", handler.Method, handler.Method.DeclaringType);
 
         #endregion
 
@@ -734,6 +918,9 @@ namespace DSharpPlus
         private Task Client_GuildEmojisUpdate(DiscordClient client, GuildEmojisUpdateEventArgs e)
             => this._guildEmojisUpdated.InvokeAsync(client, e);
 
+        private Task Client_GuildStickersUpdate(DiscordClient client, GuildStickersUpdateEventArgs e)
+            => this._guildStickersUpdated.InvokeAsync(client, e);
+
         private Task Client_GuildIntegrationsUpdate(DiscordClient client, GuildIntegrationsUpdateEventArgs e)
             => this._guildIntegrationsUpdated.InvokeAsync(client, e);
 
@@ -802,20 +989,57 @@ namespace DSharpPlus
 
         private Task Client_ComponentInteractionCreate(DiscordClient client, ComponentInteractionCreateEventArgs e)
             => this._componentInteractionCreated.InvokeAsync(client, e);
+
+        private Task Client_ModalSubmitted(DiscordClient client, ModalSubmitEventArgs e)
+            => this._modalSubmitted.InvokeAsync(client, e);
+
+        private Task Client_ContextMenuInteractionCreate(DiscordClient client, ContextMenuInteractionCreateEventArgs e)
+            => this._contextMenuInteractionCreated.InvokeAsync(client, e);
+
         private Task Client_WebhooksUpdate(DiscordClient client, WebhooksUpdateEventArgs e)
             => this._webhooksUpdated.InvokeAsync(client, e);
 
         private Task Client_HeartBeated(DiscordClient client, HeartbeatEventArgs e)
             => this._heartbeated.InvokeAsync(client, e);
 
-        private Task Client_ApplicationCommandCreated(DiscordClient client, ApplicationCommandEventArgs e)
-            => this._applicationCommandCreated.InvokeAsync(client, e);
+        private Task Client_Zombied(DiscordClient client, ZombiedEventArgs e)
+            => this._zombied.InvokeAsync(client, e);
 
-        private Task Client_ApplicationCommandUpdated(DiscordClient client, ApplicationCommandEventArgs e)
-            => this._applicationCommandUpdated.InvokeAsync(client, e);
+        private Task Client_IntegrationCreated(DiscordClient client, IntegrationCreateEventArgs e)
+            => this._integrationCreated.InvokeAsync(client, e);
 
-        private Task Client_ApplicationCommandDeleted(DiscordClient client, ApplicationCommandEventArgs e)
-            => this._applicationCommandDeleted.InvokeAsync(client, e);
+        private Task Client_IntegrationUpdated(DiscordClient client, IntegrationUpdateEventArgs e)
+            => this._integrationUpdated.InvokeAsync(client, e);
+
+        private Task Client_IntegrationDeleted(DiscordClient client, IntegrationDeleteEventArgs e)
+            => this._integrationDeleted.InvokeAsync(client, e);
+
+        private Task Client_StageInstanceCreated(DiscordClient client, StageInstanceCreateEventArgs e)
+            => this._stageInstanceCreated.InvokeAsync(client, e);
+
+        private Task Client_StageInstanceUpdated(DiscordClient client, StageInstanceUpdateEventArgs e)
+            => this._stageInstanceUpdated.InvokeAsync(client, e);
+
+        private Task Client_StageInstanceDeleted(DiscordClient client, StageInstanceDeleteEventArgs e)
+            => this._stageInstanceDeleted.InvokeAsync(client, e);
+
+        private Task Client_ThreadCreated(DiscordClient client, ThreadCreateEventArgs e)
+            => this._threadCreated.InvokeAsync(client, e);
+
+        private Task Client_ThreadUpdated(DiscordClient client, ThreadUpdateEventArgs e)
+            => this._threadUpdated.InvokeAsync(client, e);
+
+        private Task Client_ThreadDeleted(DiscordClient client, ThreadDeleteEventArgs e)
+            => this._threadDeleted.InvokeAsync(client, e);
+
+        private Task Client_ThreadListSynced(DiscordClient client, ThreadListSyncEventArgs e)
+            => this._threadListSynced.InvokeAsync(client, e);
+
+        private Task Client_ThreadMemberUpdated(DiscordClient client, ThreadMemberUpdateEventArgs e)
+            => this._threadMemberUpdated.InvokeAsync(client, e);
+
+        private Task Client_ThreadMembersUpdated(DiscordClient client, ThreadMembersUpdateEventArgs e)
+            => this._threadMembersUpdated.InvokeAsync(client, e);
 
         #endregion
     }

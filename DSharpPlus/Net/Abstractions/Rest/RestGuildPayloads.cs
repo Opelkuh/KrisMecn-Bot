@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,10 +21,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using DSharpPlus.Entities;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using DSharpPlus.Entities;
+using Newtonsoft.Json;
 
 namespace DSharpPlus.Net.Abstractions
 {
@@ -58,6 +58,9 @@ namespace DSharpPlus.Net.Abstractions
 
         [JsonProperty("channels", NullValueHandling = NullValueHandling.Ignore)]
         public IEnumerable<RestChannelCreatePayload> Channels { get; set; }
+
+        [JsonProperty("system_channel_flags", NullValueHandling = NullValueHandling.Ignore)]
+        public SystemChannelFlags? SystemChannelFlags { get; set; }
     }
 
     internal sealed class RestGuildCreateFromTemplatePayload
@@ -106,6 +109,30 @@ namespace DSharpPlus.Net.Abstractions
 
         [JsonProperty("system_channel_id", NullValueHandling = NullValueHandling.Include)]
         public Optional<ulong?> SystemChannelId { get; set; }
+
+        [JsonProperty("banner")]
+        public Optional<string> Banner { get; set; }
+
+        [JsonProperty("discorvery_splash")]
+        public Optional<string> DiscoverySplash { get; set; }
+
+        [JsonProperty("system_channel_flags")]
+        public Optional<SystemChannelFlags> SystemChannelFlags { get; set; }
+
+        [JsonProperty("rules_channel_id")]
+        public Optional<ulong?> RulesChannelId { get; set; }
+
+        [JsonProperty("public_updates_channel_id")]
+        public Optional<ulong?> PublicUpdatesChannelId { get; set; }
+
+        [JsonProperty("preferred_locale")]
+        public Optional<string> PreferredLocale { get; set; }
+
+        [JsonProperty("description")]
+        public Optional<string> Description { get; set; }
+
+        [JsonProperty("features")]
+        public Optional<IEnumerable<string>> Features { get; set; }
     }
 
     internal sealed class RestGuildMemberAddPayload : IOAuth2Payload
@@ -124,6 +151,63 @@ namespace DSharpPlus.Net.Abstractions
 
         [JsonProperty("deaf", NullValueHandling = NullValueHandling.Ignore)]
         public bool? Deaf { get; set; }
+    }
+
+    internal sealed class RestScheduledGuildEventCreatePayload
+    {
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
+        public string Name { get; set; }
+
+        [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
+        public string Description { get; set; }
+
+        [JsonProperty("channel_id", NullValueHandling = NullValueHandling.Ignore)]
+        public ulong? ChannelId { get; set; }
+
+        [JsonProperty("privacy_level", NullValueHandling = NullValueHandling.Ignore)]
+        public ScheduledGuildEventPrivacyLevel PrivacyLevel { get; set; }
+
+        [JsonProperty("entity_type", NullValueHandling = NullValueHandling.Ignore)]
+        public ScheduledGuildEventType Type { get; set; }
+
+        [JsonProperty("scheduled_start_time", NullValueHandling = NullValueHandling.Ignore)]
+        public DateTimeOffset StartTime { get; set; }
+
+        [JsonProperty("scheduled_end_time", NullValueHandling = NullValueHandling.Ignore)]// Null = no end date
+        public DateTimeOffset? EndTime { get; set; }
+
+        [JsonProperty("entity_metadata", NullValueHandling = NullValueHandling.Ignore)]
+        public DiscordScheduledGuildEventMetadata Metadata { get; set; }
+    }
+
+    internal sealed class RestScheduledGuildEventModifyPayload
+    {
+        [JsonProperty("name", NullValueHandling = NullValueHandling.Ignore)]
+        public Optional<string> Name { get; set; }
+
+        [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
+        public Optional<string> Description { get; set; }
+
+        [JsonProperty("channel_id", NullValueHandling = NullValueHandling.Ignore)]
+        public Optional<ulong?> ChannelId { get; set; }
+
+        [JsonProperty("privacy_level", NullValueHandling = NullValueHandling.Ignore)]
+        public Optional<ScheduledGuildEventPrivacyLevel> PrivacyLevel { get; set; }
+
+        [JsonProperty("entity_type", NullValueHandling = NullValueHandling.Ignore)]
+        public Optional<ScheduledGuildEventType> Type { get; set; }
+
+        [JsonProperty("scheduled_start_time", NullValueHandling = NullValueHandling.Ignore)]
+        public Optional<DateTimeOffset> StartTime { get; set; }
+
+        [JsonProperty("scheduled_end_time", NullValueHandling = NullValueHandling.Ignore)]
+        public Optional<DateTimeOffset> EndTime { get; set; }
+
+        [JsonProperty("entity_metadata", NullValueHandling = NullValueHandling.Ignore)]
+        public Optional<DiscordScheduledGuildEventMetadata> Metadata { get; set; }
+
+        [JsonProperty("status", NullValueHandling = NullValueHandling.Ignore)]
+        public Optional<ScheduledGuildEventStatus> Status { get; set; }
     }
 
     internal sealed class RestGuildChannelReorderPayload
@@ -166,6 +250,9 @@ namespace DSharpPlus.Net.Abstractions
 
         [JsonProperty("channel_id")]
         public Optional<ulong?> VoiceChannelId { get; set; }
+
+        [JsonProperty("communication_disabled_until", NullValueHandling = NullValueHandling.Include)]
+        public Optional<DateTimeOffset?> CommunicationDisabledUntil { get; set; }
     }
 
     internal sealed class RestGuildRolePayload
@@ -184,6 +271,12 @@ namespace DSharpPlus.Net.Abstractions
 
         [JsonProperty("mentionable", NullValueHandling = NullValueHandling.Ignore)]
         public bool? Mentionable { get; set; }
+
+        [JsonProperty("unicode_emoji", NullValueHandling = NullValueHandling.Ignore)]
+        public string Emoji { get; set; }
+
+        [JsonProperty("icon", NullValueHandling = NullValueHandling.Ignore)]
+        public string Icon { get; set; }
     }
 
     internal sealed class RestGuildPruneResultPayload

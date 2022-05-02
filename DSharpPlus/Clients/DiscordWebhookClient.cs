@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,10 +21,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-using DSharpPlus.Entities;
-using DSharpPlus.Exceptions;
-using DSharpPlus.Net;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -33,6 +29,10 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using DSharpPlus.Entities;
+using DSharpPlus.Exceptions;
+using DSharpPlus.Net;
+using Microsoft.Extensions.Logging;
 
 namespace DSharpPlus
 {
@@ -41,6 +41,11 @@ namespace DSharpPlus
     /// </summary>
     public class DiscordWebhookClient
     {
+        /// <summary>
+        /// Gets the logger for this client.
+        /// </summary>
+        public ILogger<DiscordWebhookClient> Logger { get; }
+
         // this regex has 2 named capture groups: "id" and "token".
         private static Regex WebhookRegex { get; } = new Regex(@"(?:https?:\/\/)?discord(?:app)?.com\/api\/(?:v\d\/)?webhooks\/(?<id>\d+)\/(?<token>[A-Za-z0-9_\-]+)", RegexOptions.ECMAScript);
 
@@ -93,11 +98,11 @@ namespace DSharpPlus
                 loggerFactory.AddProvider(new DefaultLoggerProvider(this));
             }
 
-            var logger = loggerFactory.CreateLogger<DiscordWebhookClient>();
+            this.Logger = loggerFactory.CreateLogger<DiscordWebhookClient>();
 
             var parsedTimeout = timeout ?? TimeSpan.FromSeconds(10);
 
-            this._apiclient = new DiscordApiClient(proxy, parsedTimeout, useRelativeRateLimit, logger);
+            this._apiclient = new DiscordApiClient(proxy, parsedTimeout, useRelativeRateLimit, this.Logger);
             this._hooks = new List<DiscordWebhook>();
             this.Webhooks = new ReadOnlyCollection<DiscordWebhook>(this._hooks);
         }

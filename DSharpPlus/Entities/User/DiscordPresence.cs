@@ -1,7 +1,7 @@
 // This file is part of the DSharpPlus project.
 //
 // Copyright (c) 2015 Mike Santiago
-// Copyright (c) 2016-2021 DSharpPlus Contributors
+// Copyright (c) 2016-2022 DSharpPlus Contributors
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+using System.Collections.Generic;
 using DSharpPlus.Net.Abstractions;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 
 namespace DSharpPlus.Entities
 {
@@ -58,10 +58,10 @@ namespace DSharpPlus.Entities
         /// Gets the user's current activities.
         /// </summary>
         [JsonIgnore]
-        public IReadOnlyList<DiscordActivity> Activities => this.InternalActivities;
+        public IReadOnlyList<DiscordActivity> Activities => this._internalActivities;
 
         [JsonIgnore]
-        internal DiscordActivity[] InternalActivities;
+        internal DiscordActivity[] _internalActivities;
 
         [JsonProperty("activities", NullValueHandling = NullValueHandling.Ignore)]
         internal TransportActivity[] RawActivities { get; set; }
@@ -93,9 +93,11 @@ namespace DSharpPlus.Entities
         internal DiscordPresence(DiscordPresence other)
         {
             this.Discord = other.Discord;
-            this.Activity = other.Activity;
-            this.RawActivity = other.RawActivity;
-            this.InternalActivities = (DiscordActivity[])other.InternalActivities?.Clone();
+            if (other.Activity != null)
+                this.Activity = new DiscordActivity(other.Activity);
+            if (other.Activity != null)
+                this.RawActivity = new TransportActivity(this.Activity);
+            this._internalActivities = (DiscordActivity[])other._internalActivities?.Clone();
             this.RawActivities = (TransportActivity[])other.RawActivities?.Clone();
             this.Status = other.Status;
             this.InternalUser = new TransportUser(other.InternalUser);
