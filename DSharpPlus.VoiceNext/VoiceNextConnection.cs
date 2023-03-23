@@ -806,7 +806,7 @@ namespace DSharpPlus.VoiceNext
             // IP Discovery
             this.UdpClient.Setup(this.UdpEndpoint);
 
-            var pck = new byte[70];
+            var pck = new byte[74];
             PreparePacket(pck);
             await this.UdpClient.SendAsync(pck, pck.Length).ConfigureAwait(false);
 
@@ -845,20 +845,22 @@ namespace DSharpPlus.VoiceNext
             {
                 var ssrc = this.SSRC;
                 var packetSpan = packet.AsSpan();
-                MemoryMarshal.Write(packetSpan, ref ssrc);
-                Helpers.ZeroFill(packetSpan);
+                packetSpan.Fill(0);
+                packetSpan[1] = 0x1; // request
+                packetSpan[3] = 70;
+                MemoryMarshal.Write(packetSpan.Slice(4, 4), ref ssrc);
             }
 
             void ReadPacket(byte[] packet, out System.Net.IPAddress decodedIp, out ushort decodedPort)
             {
-                if (packet.Length != 70) throw new Exception($"Recieved invalid IP discovery data. Expected length 70 but got {packet.Length}");
+                if (packet.Length != 74) throw new Exception($"Recieved invalid IP discovery data. Expected length 74 but got {packet.Length}");
 
                 var packetSpan = packet.AsSpan();
 
-                var ipString = Utilities.UTF8.GetString(packet, 4, 64 /* 70 - 6 */).TrimEnd('\0');
+                var ipString = Utilities.UTF8.GetString(packet, 8, 64 /* 74 - 10 */).TrimEnd('\0');
                 decodedIp = System.Net.IPAddress.Parse(ipString);
 
-                decodedPort = BinaryPrimitives.ReadUInt16LittleEndian(packetSpan.Slice(68 /* 70 - 2 */));
+                decodedPort = BinaryPrimitives.ReadUInt16LittleEndian(packetSpan.Slice(72 /* 74 - 2 */));
             }
 
             // Select voice encryption mode
